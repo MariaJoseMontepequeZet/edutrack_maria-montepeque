@@ -1,4 +1,4 @@
-# EduTrack - Panel de Gestión Educativa
+# StudentScope MJ - Panel de Gestión Educativa
 
 EduTrack es una Single Page Application (SPA) para gestionar y monitorear estudiantes. Está construida sin frameworks (JavaScript y CSS puros) y guarda sus datos en el navegador.
 
