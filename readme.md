@@ -1,86 +1,104 @@
-# EduTrack — Panel de Gestión Educativa
+# EduTrack - Panel de Gestión Educativa
 
-EduTrack es una plataforma Single Page Application (SPA) orientada a la gestión, administración y monitoreo analítico de estudiantes. Construida completamente sin frameworks (Vanilla JavaScript y CSS Puro), la aplicación destaca por su rendimiento, modularidad y un estricto control sobre la calidad e integridad de los datos.
+EduTrack es una Single Page Application (SPA) para gestionar y monitorear estudiantes. Está construida sin frameworks (JavaScript y CSS puros) y guarda sus datos en el navegador.
 
->Hecho por Maria Jose Montepeque Zet
----
-
-## 🚀 Características Principales
-
-* **Arquitectura SPA Integrada:** Navegación fluida entre la Landing Page, el Login y el Dashboard interactivo sin recargas de página, gestionada a través de un enrutador ligero personalizado.
-* **Dashboard Analítico:** Visualización de KPIs en tiempo real (ingresos, retención, progreso general) y gráficos dinámicos interactivos soportados por Chart.js.
-* **Gestión de Estudiantes (CRUD):** * Interfaz en formato *grid* para visualizar perfiles.
-  * Búsqueda y filtrado multicriterio (nombre, ciudad, plan, estado).
-  * Paginación integrada.
-  * Formularios modales para agregar, editar y eliminar registros (con persistencia en `localStorage`).
-* **Sistema de Notificaciones Inteligente:** Panel flotante que evalúa el estado del dataset en tiempo real para generar alertas (ej. riesgo de abandono, cursos completados, resúmenes financieros).
-* **Sidebar Responsivo y Accesible:** Menú lateral colapsable con animaciones fluidas, gestión de foco (focus trap) para accesibilidad y adaptación automática en dispositivos móviles.
-* **Motor de Meta-Validación:** Un script robusto e independiente que audita el dataset bajo 20 reglas de negocio estrictas antes de su renderizado.
+Hecho por María José Montepeque Zet.
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## Características principales
 
-* **Estructura y Estilos:** HTML5 Semántico, CSS Puro (Custom Properties, Flexbox, CSS Grid).
-* **Lógica y Funcionalidad:** JavaScript Vanilla (ES5/ES6, Patrón de Módulos IIFE).
-* **Visualización de Datos:** Chart.js (v4.4.0).
+* **SPA con enrutador ligero:** navegación entre Landing, Login y Dashboard sin recargar la página.
+* **Dashboard analítico:** indicadores clave y gráficas con Chart.js.
+* **Gestión de estudiantes (CRUD):**
+  * Vista en tarjetas.
+  * Búsqueda y filtros por nombre, ciudad, plan y estado.
+  * Paginación.
+  * Formularios modales para agregar, editar y eliminar, con persistencia en `localStorage`.
+* **Catálogo de cursos:** 30 cursos filtrables por categoría.
+* **Reportes:** ingresos, retención, progreso promedio, gráficas por plan y por rango de progreso, y Top 10 de estudiantes.
+* **Configuración:** exportación a JSON y CSV, y restablecimiento de los datos iniciales.
+* **Notificaciones:** panel que genera alertas a partir de los datos (abandono, cursos completados).
+* **Sidebar accesible:** menú colapsable con control de foco, cierre con Escape y adaptación a móvil.
+* **Motor de validación:** módulo independiente con 20 reglas de negocio sobre el dataset.
+
+---
+
+## Tecnologías utilizadas
+
+* **Estructura y estilos:** HTML5 semántico y CSS puro (variables, Flexbox, Grid).
+* **Lógica:** JavaScript vanilla con patrón de módulos (IIFE).
+* **Gráficas:** Chart.js 4.4.0, cargado desde CDN.
 * **Fuentes:** Google Fonts (Syne, DM Sans).
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del proyecto
 
-La arquitectura del proyecto separa estrictamente la estructura, los estilos y la lógica de negocio.
-
-| Archivo / Directorio | Descripción |
+| Archivo | Descripción |
 | :--- | :--- |
-| `index.html` | Archivo raíz. Contiene la estructura de todas las vistas (Landing, Login, Dashboard, Modales). |
-| `style.css` | Hoja de estilos global. Define variables (tokens), tipografía, utilidades (botones, badges, toasts) y la Landing Page. |
-| `Dashboard.css` | Estilos estructurales del panel administrativo, Sidebar, Topbar, KPIs y tablas. |
-| `Estudiantes.css` | Estilos específicos para la vista de gestión (Grid de cards, filtros, paginación, formularios modales). |
-| `App.js` | Lógica principal (Router SPA, inicialización de componentes, CRUD de estudiantes, lógica de notificaciones y renderizado). |
-| `Sidebar.js` | Controlador independiente del menú lateral colapsable (gestión de eventos de UI, accesibilidad y resize). |
-| `Validacion.js` | Motor de meta-validación que expone una API para verificar la integridad del dataset contra reglas de negocio. |
-| `Datos.json` | Dataset inicial estático con 35 registros de muestra. |
-| `informe-calidad-datos.md` | Auditoría de datos generada por el sistema de validación. |
+| `index.html` | Estructura de todas las vistas (Landing, Login, Dashboard y modales). |
+| `css/Style.css` | Estilos globales: variables, tipografía, botones, insignias, toasts y Landing. |
+| `css/Dashboard.css` | Estilos del panel: Sidebar, Topbar, indicadores y tablas. |
+| `css/Estudiantes.css` | Estilos de la gestión de estudiantes: tarjetas, filtros, paginación y modales. |
+| `js/App.js` | Lógica principal: enrutador, CRUD, gráficas, cursos, reportes, configuración y notificaciones. |
+| `js/Sidebar.js` | Control del menú lateral: eventos, accesibilidad y cambio de tamaño. |
+| `js/Validacion.js` | Motor de validación del dataset con 20 reglas de negocio. |
+| `json/Datos.json` | Copia del dataset inicial de 35 estudiantes, igual al de `App.js`. |
 
 ---
 
-## ⚙️ Instalación y Uso
+## Instalación y uso
 
-Dado que el proyecto no requiere procesos de compilación ni dependencias de Node.js (NPM), la instalación es inmediata:
+No requiere compilación ni dependencias.
 
-1. **Clonar el repositorio** o descargar los archivos.
-2. **Estructurar los directorios** asegurando que las rutas de los assets en `index.html` coincidan (por defecto asume carpetas `/css/` y `/js/`).
-3. **Ejecutar el proyecto:**
-   * **Opción A (Recomendada):** Usa un servidor local ligero como la extensión *Live Server* en VSCode para evitar restricciones de CORS con módulos o Web Storage.
-   * **Opción B:** Abre directamente el archivo `index.html` en cualquier navegador moderno.
+1. Clona el repositorio o descarga los archivos.
+2. Abre `index.html` en un navegador moderno, o sírvelo con una extensión como Live Server de VS Code.
 
-> **Nota sobre los datos:** EduTrack inicializa una base de datos de prueba en el `localStorage` del navegador la primera vez que se carga. Puedes restablecer estos datos desde la vista "Configuración" en el Dashboard.
+Los nombres de archivos y carpetas distinguen mayúsculas y minúsculas en servidores Linux (por ejemplo, `css/Style.css`).
 
----
-
-## 🧠 Arquitectura de JavaScript
-
-El proyecto utiliza el patrón de Módulos (IIFE - *Immediately Invoked Function Expression*) para aislar el *scope* y evitar la contaminación del objeto global `window`, exponiendo únicamente los métodos necesarios a través de `window.EduTrack`.
-
-* **Estado Centralizado:** `App.js` maneja un objeto `state` que controla la vista actual, los datos de los estudiantes, filtros y las instancias de los gráficos.
-* **Manejo del DOM:** En lugar de frameworks reactivos, el sistema re-renderiza componentes específicos (como el Grid de estudiantes o los gráficos) únicamente cuando ocurren mutaciones en el estado, utilizando *Template Literals*.
+La primera vez que se carga, EduTrack guarda un dataset de prueba en el `localStorage` del navegador. Se puede restablecer desde la sección Configuración del Dashboard.
 
 ---
 
-## 🛡️ Sistema de Meta-Validación (`Validacion.js`)
+## Arquitectura de JavaScript
 
-El proyecto incluye un motor de auditoría de datos riguroso que evalúa el dataset antes de permitir su uso en producción. El validador clasifica los problemas en tres niveles:
+Cada archivo usa una IIFE para no contaminar el objeto global. Solo se expone lo necesario en `window.EduTrack`.
 
-1. **ERROR (🔴):** Bloquean el registro (ej. ID duplicado, formato de fecha inválido, monto incoherente con el plan).
-2. **WARNING (🟡):** Incoherencias de negocio, el registro se renderiza pero requiere revisión (ej. progreso del 100% pero marcado como activo).
-3. **INFO (🔵):** Observaciones generales (ej. saltos en la secuencia de IDs).
+* **Estado centralizado:** `App.js` mantiene un objeto `state` con la vista actual, los estudiantes, los filtros y las instancias de las gráficas.
+* **Renderizado:** los componentes se vuelven a pintar con plantillas de texto cuando cambia el estado.
 
-**Uso de la API de validación:**
+---
+
+## Motor de validación (`js/Validacion.js`)
+
+Clasifica los problemas en tres niveles:
+
+1. **ERROR:** el registro no es utilizable (por ejemplo, ID duplicado, fecha inválida o monto que no coincide con el plan).
+2. **WARNING:** incoherencia de negocio que requiere revisión (por ejemplo, inactivo con bajo progreso).
+3. **INFO:** observación general (por ejemplo, saltos en la secuencia de IDs).
+
+Uso en el navegador:
+
 ```javascript
-// Ejecutar validación completa sobre un array de datos
-const resultado = EduTrack.validar.dataset(estudiantesArray);
+const resultado = EduTrack.validar.dataset(estudiantes);
+console.log(resultado.reporte);
+const registrosSeguros = resultado.registrosValidos;
+```
 
-console.log(resultado.reporte); // Imprime un reporte detallado en consola
-const datosSeguros = resultado.registrosValidos; // Array purgado de errores
+Uso en Node.js:
+
+```bash
+node js/Validacion.js
+```
+
+Estado actual: el validador funciona de forma independiente, pero la interfaz todavía no lo invoca. Su integración con el formulario y la carga de datos está en el plan de trabajo.
+
+---
+
+## Registro de cambios
+
+### Día 1 - Orden del repositorio
+* Se agregan `.gitignore` y `.editorconfig`.
+* Se corrige este README: nombres reales de archivos, descripción del estado del validador y eliminación de emojis.
+* Se unifica `json/Datos.json` con el dataset de `App.js` (correos de los registros 1 a 5 y estado de los registros 21 y 33).
