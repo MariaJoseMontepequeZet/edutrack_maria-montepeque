@@ -1,6 +1,11 @@
-# EduTrack - Panel de Gestión Educativa
+# StudentScope MJ - Panel de Gestión Educativa
 
-EduTrack es una Single Page Application (SPA) para gestionar y monitorear estudiantes. Está construida sin frameworks (JavaScript y CSS puros) y guarda sus datos en el navegador.
+StudentScope MJ es una Single Page Application (SPA) para gestionar y monitorear estudiantes. Está construida sin frameworks (JavaScript y CSS puros) y guarda sus datos en el navegador.
+
+Repositorios del proyecto:
+
+* Frontend: `studentscope-mj-frontend` (este repositorio).
+* Backend: `studentscope-mj-backend` (en preparación).
 
 Hecho por María José Montepeque Zet.
 
@@ -57,13 +62,13 @@ No requiere compilación ni dependencias.
 
 Los nombres de archivos y carpetas distinguen mayúsculas y minúsculas en servidores Linux (por ejemplo, `css/Style.css`).
 
-La primera vez que se carga, EduTrack guarda un dataset de prueba en el `localStorage` del navegador. Se puede restablecer desde la sección Configuración del Dashboard.
+La primera vez que se carga, la aplicación guarda un dataset de prueba en el `localStorage` del navegador. Se puede restablecer desde la sección Configuración del Dashboard.
 
 ---
 
 ## Arquitectura de JavaScript
 
-Cada archivo usa una IIFE para no contaminar el objeto global. Solo se expone lo necesario en `window.EduTrack`.
+Cada archivo usa una IIFE para no contaminar el objeto global. Solo se expone lo necesario en `window.EduTrack`. Ese nombre y la clave `edutrack_estudiantes` de `localStorage` se mantienen por compatibilidad con los datos ya guardados; se renombrarán al modularizar el código.
 
 * **Estado centralizado:** `App.js` mantiene un objeto `state` con la vista actual, los estudiantes, los filtros y las instancias de las gráficas.
 * **Renderizado:** los componentes se vuelven a pintar con plantillas de texto cuando cambia el estado.
@@ -102,3 +107,8 @@ Estado actual: el validador funciona de forma independiente, pero la interfaz to
 * Se agregan `.gitignore` y `.editorconfig`.
 * Se corrige este README: nombres reales de archivos, descripción del estado del validador y eliminación de emojis.
 * Se unifica `json/Datos.json` con el dataset de `App.js` (correos de los registros 1 a 5 y estado de los registros 21 y 33).
+
+### Renombre del proyecto a StudentScope MJ
+* Se actualizan el título, el logotipo, los textos visibles y los encabezados de los archivos.
+* Los repositorios pasan a llamarse `studentscope-mj-frontend` y `studentscope-mj-backend`.
+* Se conservan `window.EduTrack` y la clave `edutrack_estudiantes` de `localStorage` para no perder los datos guardados.
