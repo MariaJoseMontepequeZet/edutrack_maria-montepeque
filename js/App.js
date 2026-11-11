@@ -1,5 +1,5 @@
 /**
- * EduTrack — app.js v2.3
+ * StudentScope MJ — app.js v2.3
  * Cambios v2.3:
  * - Logout ahora va a 'landing' en vez de 'login'
  * - initNavSidebar incorpora cursos, reportes y configuracion
@@ -605,7 +605,7 @@
         sec.innerHTML =
             '<header class="page-header">' +
             '<div><h2 class="page-header__title">Catálogo de <span>Cursos</span></h2>' +
-            '<p class="page-header__meta">' + CATALOGO_CURSOS.length + ' cursos disponibles · EduTrack</p></div>' +
+            '<p class="page-header__meta">' + CATALOGO_CURSOS.length + ' cursos disponibles · StudentScope MJ</p></div>' +
             '</header>' +
             '<div class="cat-tabs" role="tablist" aria-label="Filtrar por categoría">' + tabsHTML + '</div>' +
             '<p class="cursos-count">Mostrando <strong>' + lista.length + '</strong> curso' + (lista.length !== 1 ? 's' : '') + '</p>' +
@@ -794,7 +794,7 @@
         sec.innerHTML =
             '<header class="page-header">' +
             '<div><h2 class="page-header__title">Configuración <span>del Sistema</span></h2>' +
-            '<p class="page-header__meta">Ajustes generales · EduTrack v2.3</p></div>' +
+            '<p class="page-header__meta">Ajustes generales · StudentScope MJ v2.3</p></div>' +
             '</header>' +
 
             '<div class="config-grid">' +
@@ -804,7 +804,7 @@
             '<h3 class="config-card__title" id="cfg-perfil">👤 Perfil del administrador</h3>' +
             '<div class="config-form">' +
             '<div class="form-group"><label class="config-label">Nombre completo</label>' +
-            '<input type="text" class="form-input config-input" id="cfgNombre" value="Administrador EduTrack" /></div>' +
+            '<input type="text" class="form-input config-input" id="cfgNombre" value="Administrador StudentScope MJ" /></div>' +
             '<div class="form-group"><label class="config-label">Correo electrónico</label>' +
             '<input type="email" class="form-input config-input" id="cfgEmail" value="admin@edutrack.co" /></div>' +
             '<div class="form-group"><label class="config-label">Cargo</label>' +
@@ -858,7 +858,7 @@
             '<button class="btn btn-danger" onclick="EduTrack.restablecerDatos()">🔄 Restablecer</button>' +
             '</div>' +
             '</div>' +
-            '<p class="config-version">EduTrack v2.3 · Vanilla JS · CSS Puro · Sin frameworks</p>' +
+            '<p class="config-version">StudentScope MJ v2.3 · Vanilla JS · CSS Puro · Sin frameworks</p>' +
             '</section>' +
 
             '</div>';

@@ -1,5 +1,5 @@
 /**
- * EduTrack — sidebar.js
+ * StudentScope MJ — sidebar.js
  * Controla el sidebar colapsable del dashboard.
  * Correcciones v2:
  * - Añade .is-active al botón hamburger (animación ☰ → X en CSS)
