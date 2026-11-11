@@ -3,7 +3,7 @@
         "id": 1,
         "nombre": "Juan",
         "apellido": "Pérez",
-        "email": "Pjuan5058@gmail.com",
+        "email": "pjuan5058@gmail.com",
         "ciudad": "Bogotá",
         "curso": "Desarrollo Web",
         "progreso": 75,
@@ -16,7 +16,7 @@
         "id": 2,
         "nombre": "María",
         "apellido": "Gómez",
-        "email": "mariagomez@gmail.com",
+        "email": "maria.gomez91@gmail.com",
         "ciudad": "Medellín",
         "curso": "Diseño UX/UI",
         "progreso": 60,
@@ -29,7 +29,7 @@
         "id": 3,
         "nombre": "Carlos",
         "apellido": "López",
-        "email": "carloslopez@gmail.com",
+        "email": "carlos.lopezdev@gmail.com",
         "ciudad": "Cali",
         "curso": "Marketing Digital",
         "progreso": 85,
@@ -42,7 +42,7 @@
         "id": 4,
         "nombre": "Ana",
         "apellido": "Martínez",
-        "email": "anamartinez@gmail.com",
+        "email": "anamartinez14@gmail.com",
         "ciudad": "Bogotá",
         "curso": "Desarrollo Web",
         "progreso": 90,
@@ -55,7 +55,7 @@
         "id": 5,
         "nombre": "Luis",
         "apellido": "García",
-        "email": "luisgarcia@gmail.com",
+        "email": "luisgarcia.tech@gmail.com",
         "ciudad": "Medellín",
         "curso": "Diseño UX/UI",
         "progreso": 70,
@@ -270,7 +270,7 @@
         "fechaInscripcion": "2024-10-05",
         "plan": "Premium",
         "montoUSD": 99.99,
-        "activo": true
+        "activo": false
     },
     {
         "id": 22,
@@ -426,7 +426,7 @@
         "fechaInscripcion": "2023-12-10",
         "plan": "Premium",
         "montoUSD": 99.99,
-        "activo": true
+        "activo": false
     },
     {
         "id": 34,
