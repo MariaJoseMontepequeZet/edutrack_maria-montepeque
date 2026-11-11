@@ -2,7 +2,7 @@
     'use strict';
 
     /**
-     * EduTrack — validacion.js
+     * StudentScope MJ — validacion.js
      * ─────────────────────────────────────────────────────────────
      * META-VALIDACIÓN del dataset de estudiantes.
      *
@@ -39,7 +39,7 @@
         'Premium': 99.99
     };
 
-    /** Cursos oficiales del catálogo EduTrack */
+    /** Cursos oficiales del catálogo StudentScope MJ */
     var CURSOS_VALIDOS = [
         'Desarrollo Web',
         'Diseño UX/UI',
@@ -317,7 +317,7 @@
                 registro.id,
                 'ciudad',
                 'V-06',
-                'Ciudad "' + ciudad + '" no está en el listado oficial de EduTrack. ' +
+                'Ciudad "' + ciudad + '" no está en el listado oficial de StudentScope MJ. ' +
                 'Ciudades aceptadas: ' + CIUDADES_VALIDAS.join(', '),
                 ciudad
             ));
@@ -328,7 +328,7 @@
 
     /**
      * V-07 | ERROR
-     * El curso debe existir en el catálogo oficial de EduTrack.
+     * El curso debe existir en el catálogo oficial de StudentScope MJ.
      */
     function validarCurso(registro) {
         var errores = [];
@@ -819,7 +819,7 @@
        ============================================================ */
 
     /**
-     * Valida el dataset completo de estudiantes EduTrack antes
+     * Valida el dataset completo de estudiantes StudentScope MJ antes
      * de que los datos lleguen a cualquier componente de la interfaz.
      *
      * Ejecuta en dos pasadas:
@@ -858,7 +858,7 @@
                 registrosValidos: [],
                 registrosInvalidos: [],
                 porRegla: { 'V-00': 1 },
-                reporte: '[EduTrack] ✗ Error: dataset() recibió ' +
+                reporte: '[StudentScope MJ] ✗ Error: dataset() recibió ' +
                     typeof estudiantes + ' en lugar de Array.'
             };
         }
@@ -878,7 +878,7 @@
                 registrosValidos: [],
                 registrosInvalidos: [],
                 porRegla: { 'V-00': 1 },
-                reporte: '[EduTrack] ✗ Error: El dataset está vacío.'
+                reporte: '[StudentScope MJ] ✗ Error: El dataset está vacío.'
             };
         }
 
@@ -970,7 +970,7 @@
         var sep2 = '───────────────────────────────────────────────────────────';
         var lineas = [
             sep,
-            '  EduTrack — Reporte de Meta-Validación (dataset)',
+            '  StudentScope MJ — Reporte de Meta-Validación (dataset)',
             sep,
             '',
             '  Estado general  : ' + (esValido ? '✓  VÁLIDO — todos los registros aptos' : '✗  CON ERRORES — ver detalle abajo'),
