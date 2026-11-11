@@ -101,6 +101,18 @@ Estado actual: el validador funciona de forma independiente, pero la interfaz to
 
 ---
 
+## Despliegue
+
+Cada push a `main` despliega el frontend en el servidor mediante GitHub Actions (`.github/workflows/desplegar.yml`) y un runner propio con la etiqueta `studentscope-mj-frontend`.
+
+El flujo de trabajo es: una rama por tarea, pull request hacia `dev` y, al cerrar cada entrega, de `dev` a `main`. Solo el merge a `main` despliega.
+
+El workflow copia únicamente `index.html`, `css/`, `js/` y `json/` al servidor y ejecuta `desplegar.sh web`, que espera a que el servicio responda sano. Si se agrega una carpeta nueva de recursos, hay que incluirla en el paso de copia del workflow.
+
+La configuración del servidor (Docker Compose, Caddy y secretos) vive fuera del repositorio.
+
+---
+
 ## Registro de cambios
 
 ### Día 1 - Orden del repositorio
@@ -112,3 +124,7 @@ Estado actual: el validador funciona de forma independiente, pero la interfaz to
 * Se actualizan el título, el logotipo, los textos visibles y los encabezados de los archivos.
 * Los repositorios pasan a llamarse `studentscope-mj-frontend` y `studentscope-mj-backend`.
 * Se conservan `window.EduTrack` y la clave `edutrack_estudiantes` de `localStorage` para no perder los datos guardados.
+
+### Despliegue automatico
+* Se agrega el workflow `desplegar.yml`, que despliega en el servidor con cada push a `main`.
+* Se documenta el flujo de ramas y qué archivos se publican.
