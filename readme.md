@@ -52,6 +52,11 @@ Hecho por María José Montepeque Zet.
 | `js/Escapar.js` | Utilidades de seguridad: escape de HTML y conversión segura a número. |
 | `js/Iconos.js` | Iconos SVG propios y función que los inserta en los elementos con `data-icono`. |
 | `json/Datos.json` | Copia del dataset inicial de 35 estudiantes, igual al de `App.js`. |
+| `test/` | Pruebas automáticas con Vitest: las 20 reglas del validador y las utilidades de escape. |
+| `package.json` | Scripts y herramientas de desarrollo (solo para pruebas y calidad de código; la aplicación no las usa). |
+| `eslint.config.mjs` | Reglas de ESLint para el código del navegador, las pruebas y el validador. |
+| `vitest.config.mjs` | Configuración de Vitest. |
+| `.prettierrc.json` | Estilo de formato para pruebas y archivos de configuración. |
 
 ---
 
@@ -65,6 +70,28 @@ No requiere compilación ni dependencias.
 Los nombres de archivos y carpetas distinguen mayúsculas y minúsculas en servidores Linux (por ejemplo, `css/Style.css`).
 
 La primera vez que se carga, la aplicación guarda un dataset de prueba en el `localStorage` del navegador. Se puede restablecer desde la sección Configuración del Dashboard.
+
+---
+
+## Pruebas y calidad del código
+
+Las herramientas de desarrollo necesitan Node.js 22 o superior. La aplicación en sí no las necesita.
+
+```bash
+npm install
+npm test
+npm run lint
+npm run format:check
+```
+
+| Comando | Descripción |
+| :--- | :--- |
+| `npm test` | Ejecuta todas las pruebas con Vitest. |
+| `npm run test:watch` | Ejecuta las pruebas y las repite al guardar cambios. |
+| `npm run lint` | Revisa el código con ESLint. |
+| `npm run format` | Da formato con Prettier a las pruebas y a los archivos de configuración. |
+
+Las pruebas cargan `js/Validacion.js` y `js/Escapar.js` con `require`, porque esos archivos también funcionan en Node sin cambios. Cada regla V-01 a V-20 tiene al menos un caso que debe detectarse y otro que debe aceptarse.
 
 ---
 
@@ -141,3 +168,9 @@ La configuración del servidor (Docker Compose, Caddy y secretos) vive fuera del
 * `formatFecha` ya no falla cuando la fecha no es una cadena.
 * Se eliminan los emojis de la interfaz y se reemplazan por iconos SVG (`js/Iconos.js`) donde el emoji era el único contenido de un botón o recuadro.
 * Se corrige la superposición de la lupa con el texto del buscador de estudiantes.
+
+### Día 3 - Pruebas y calidad del código
+* Se agregan Vitest, ESLint y Prettier, con los scripts `test`, `lint` y `format`.
+* Se escriben 68 pruebas: las reglas V-01 a V-20 del validador, los casos límite y las utilidades de escape.
+* Se corrige el validador: aceptaba fechas imposibles como `2023-02-30`, porque JavaScript las convierte a una fecha del mes siguiente. Ahora se rechazan.
+* Se corrigen cuatro avisos de lint: una variable sin usar en `App.js`, un parámetro sin usar y dos escapes innecesarios en la expresión regular del correo.
