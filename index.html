@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/Style.css" />
     <link rel="stylesheet" href="css/Dashboard.css" />
     <link rel="stylesheet" href="css/Estudiantes.css" />
+    <link rel="stylesheet" href="css/Cuentas.css" />
 
     <style>
         /* ── Vistas (view router) ── */
@@ -140,6 +141,22 @@
             margin-top: 1rem;
         }
 
+        .login-link {
+            background: none;
+            border: none;
+            padding: 0;
+            font: inherit;
+            color: var(--color-accent-primary);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .login-help {
+            font-size: var(--fs-xs);
+            color: var(--color-text-subtle);
+            margin-top: 0.25rem;
+        }
+
         /* ── Secciones del dashboard (control de navegación) ── */
         .db-section {
             display: block;
@@ -208,8 +225,8 @@
                 <p>La plataforma líder en capacitación y monitoreo analítico de estudiantes. Potencia tus habilidades
                     técnicas en desarrollo web, bases de datos y cloud computing de manera guiada.</p>
                 <div class="hero-cta">
-                    <button class="btn btn-primary" data-action="ir-login">Acceder al Panel
-                        Administrativo →</button>
+                    <button class="btn btn-primary" data-action="ir-login">Iniciar sesión →</button>
+                    <button class="btn btn-secondary" data-action="ir-registro">Crear cuenta</button>
                 </div>
             </div>
         </header>
@@ -331,31 +348,91 @@
             <div class="login-card">
 
                 <p class="login-logo">StudentScope <span>MJ</span></p>
-                <p class="login-subtitle">Panel administrativo · Inicia sesión para continuar</p>
+                <p class="login-subtitle">Inicia sesión para continuar</p>
 
-                <form id="formLogin" class="login-form" novalidate autocomplete="off">
+                <form id="formLogin" class="login-form" novalidate>
 
                     <div>
-                        <label class="login-label" for="loginNombre">Usuario</label>
-                        <input type="text" id="loginNombre" class="login-input" placeholder="Tu nombre de usuario"
-                            autocomplete="username" value="admin" />
-                        <p id="loginNombreError" class="login-error"></p>
+                        <label class="login-label" for="loginEmail">Correo electrónico</label>
+                        <input type="email" id="loginEmail" class="login-input" placeholder="tu@correo.com"
+                            autocomplete="username" />
+                        <p id="loginEmailError" class="login-error" role="alert"></p>
                     </div>
 
                     <div>
                         <label class="login-label" for="loginPassword">Contraseña</label>
-                        <input type="password" id="loginPassword" class="login-input" placeholder="••••••••"
-                            autocomplete="current-password" value="123456" />
-                        <p id="loginPasswordError" class="login-error"></p>
+                        <input type="password" id="loginPassword" class="login-input" placeholder="Tu contraseña"
+                            autocomplete="current-password" />
+                        <p id="loginPasswordError" class="login-error" role="alert"></p>
                     </div>
 
-                    <button type="submit" class="btn btn-primary login-btn">
+                    <button type="submit" id="btnLogin" class="btn btn-primary login-btn">
                         Iniciar sesión →
                     </button>
 
                 </form>
 
-                <p class="login-hint">Datos predeterminados inyectados para el entorno Demo.</p>
+                <p class="login-hint">¿No tienes cuenta?
+                    <button type="button" class="login-link" data-action="ir-registro">Crear cuenta</button>
+                </p>
+                <p class="login-hint">
+                    <button type="button" class="login-link" data-action="ir-landing">Volver al inicio</button>
+                </p>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="view-registro" class="view">
+        <div class="login-page">
+            <div class="login-card">
+
+                <p class="login-logo">StudentScope <span>MJ</span></p>
+                <p class="login-subtitle">Crea tu cuenta</p>
+
+                <form id="formRegistro" class="login-form" novalidate>
+
+                    <div>
+                        <label class="login-label" for="regNombre">Nombre completo</label>
+                        <input type="text" id="regNombre" class="login-input" placeholder="Tu nombre"
+                            autocomplete="name" maxlength="100" />
+                        <p id="regNombreError" class="login-error" role="alert"></p>
+                    </div>
+
+                    <div>
+                        <label class="login-label" for="regEmail">Correo electrónico</label>
+                        <input type="email" id="regEmail" class="login-input" placeholder="tu@correo.com"
+                            autocomplete="email" />
+                        <p id="regEmailError" class="login-error" role="alert"></p>
+                    </div>
+
+                    <div>
+                        <label class="login-label" for="regPassword">Contraseña</label>
+                        <input type="password" id="regPassword" class="login-input" placeholder="Crea una contraseña"
+                            autocomplete="new-password" />
+                        <p class="login-help">De 8 a 72 caracteres, con letras y números.</p>
+                        <p id="regPasswordError" class="login-error" role="alert"></p>
+                    </div>
+
+                    <div>
+                        <label class="login-label" for="regPassword2">Repite la contraseña</label>
+                        <input type="password" id="regPassword2" class="login-input" placeholder="Repite la contraseña"
+                            autocomplete="new-password" />
+                        <p id="regPassword2Error" class="login-error" role="alert"></p>
+                    </div>
+
+                    <button type="submit" id="btnRegistro" class="btn btn-primary login-btn">
+                        Crear cuenta →
+                    </button>
+
+                </form>
+
+                <p class="login-hint">¿Ya tienes cuenta?
+                    <button type="button" class="login-link" data-action="ir-login">Iniciar sesión</button>
+                </p>
+                <p class="login-hint">
+                    <button type="button" class="login-link" data-action="ir-landing">Volver al inicio</button>
+                </p>
 
             </div>
         </div>
@@ -378,27 +455,32 @@
                         <li class="db-sidebar__nav-item">
                             <a href="#" class="db-sidebar__nav-link db-sidebar__nav-link--active"
                                 data-section="dashboard" aria-current="page">
-                                <span class="db-sidebar__nav-icon" data-icono="panel"></span> Dashboard
+                                <span class="db-sidebar__nav-icon" data-icono="panel"></span> <span class="db-sidebar__nav-text">Dashboard</span>
                             </a>
                         </li>
-                        <li class="db-sidebar__nav-item">
+                        <li class="db-sidebar__nav-item" data-solo-admin>
                             <a href="#" class="db-sidebar__nav-link" data-section="estudiantes">
-                                <span class="db-sidebar__nav-icon" data-icono="usuarios"></span> Estudiantes
+                                <span class="db-sidebar__nav-icon" data-icono="usuarios"></span> <span class="db-sidebar__nav-text">Estudiantes</span>
                             </a>
                         </li>
                         <li class="db-sidebar__nav-item">
                             <a href="#" class="db-sidebar__nav-link" data-section="cursos">
-                                <span class="db-sidebar__nav-icon" data-icono="libro"></span> Cursos
+                                <span class="db-sidebar__nav-icon" data-icono="libro"></span> <span class="db-sidebar__nav-text">Cursos</span>
                             </a>
                         </li>
-                        <li class="db-sidebar__nav-item">
+                        <li class="db-sidebar__nav-item" data-solo-admin>
                             <a href="#" class="db-sidebar__nav-link" data-section="reportes">
-                                <span class="db-sidebar__nav-icon" data-icono="tendencia"></span> Reportes
+                                <span class="db-sidebar__nav-icon" data-icono="tendencia"></span> <span class="db-sidebar__nav-text">Reportes</span>
+                            </a>
+                        </li>
+                        <li class="db-sidebar__nav-item" data-solo-admin>
+                            <a href="#" class="db-sidebar__nav-link" data-section="cuentas">
+                                <span class="db-sidebar__nav-icon" data-icono="escudo"></span> <span class="db-sidebar__nav-text">Cuentas</span>
                             </a>
                         </li>
                         <li class="db-sidebar__nav-item">
                             <a href="#" class="db-sidebar__nav-link" data-section="configuracion">
-                                <span class="db-sidebar__nav-icon" data-icono="ajustes"></span> Configuración
+                                <span class="db-sidebar__nav-icon" data-icono="ajustes"></span> <span class="db-sidebar__nav-text">Configuración</span>
                             </a>
                         </li>
                     </ul>
@@ -439,7 +521,7 @@
                     </div>
 
                     <div class="db-topbar__actions">
-                        <div class="notif-wrapper">
+                        <div class="notif-wrapper" data-solo-admin>
                             <button id="btnNotificaciones" class="db-topbar__icon-btn" aria-label="Abrir notificaciones"
                                 aria-haspopup="true" aria-expanded="false">
                                 <span data-icono="campana"></span>
@@ -610,6 +692,8 @@
                         </div>
                     </div>
 
+                    <div id="secCuentas" class="db-section db-section--hidden" data-solo-admin></div>
+
                     <div id="secConfiguracion" class="db-section db-section--hidden">
                         <div class="placeholder-section">
                             <p class="placeholder-section__title">Configuración</p>
@@ -723,6 +807,49 @@
     </div>
 
 
+    <div id="cuentaOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cuentaTitulo">
+        <div class="modal">
+            <div class="modal__header">
+                <h2 class="modal__title" id="cuentaTitulo">Editar cuenta</h2>
+                <button class="modal__close" data-action="cuenta-cerrar" aria-label="Cerrar">×</button>
+            </div>
+            <form id="formCuenta" class="form-modal" novalidate>
+                <div class="form-group">
+                    <label for="cNombre">Nombre</label>
+                    <input type="text" id="cNombre" maxlength="100" autocomplete="off" />
+                    <span class="form-group__error" aria-live="polite"></span>
+                </div>
+                <div class="form-group">
+                    <label for="cEmail">Correo electrónico</label>
+                    <input type="email" id="cEmail" autocomplete="off" />
+                    <span class="form-group__error" aria-live="polite"></span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cRol">Rol</label>
+                        <select id="cRol">
+                            <option value="usuario">Usuario</option>
+                            <option value="administrador">Administrador</option>
+                        </select>
+                        <span class="form-group__error" aria-live="polite"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="cPassword">Nueva contraseña</label>
+                        <input type="password" id="cPassword" placeholder="Opcional" autocomplete="new-password" />
+                        <span class="form-group__error" aria-live="polite"></span>
+                    </div>
+                </div>
+                <p id="cuentaAyuda" class="cuenta-ayuda">Deja la contraseña en blanco para no cambiarla.</p>
+                <p id="cuentaError" class="cuenta-error" role="alert"></p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" data-action="cuenta-cerrar">Cancelar</button>
+                    <button type="submit" id="btnGuardarCuenta" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
     <div id="confirmOverlay" class="confirm-overlay" role="alertdialog" aria-modal="true"
         aria-labelledby="confirmTitulo">
         <div class="confirm-box">
@@ -731,7 +858,7 @@
             <p class="confirm-box__msg" id="confirmMsg"></p>
             <div class="confirm-actions">
                 <button class="btn btn-secondary" data-action="cerrar-confirm">Cancelar</button>
-                <button class="btn btn-danger" data-action="ejecutar-confirm">Sí, eliminar</button>
+                <button class="btn btn-danger" id="confirmAceptar" data-action="ejecutar-confirm">Sí, eliminar</button>
             </div>
         </div>
     </div>
@@ -744,6 +871,8 @@
     <script src="js/Validacion.js"></script>
     <script src="js/Escapar.js"></script>
     <script src="js/Iconos.js"></script>
+    <script src="js/Api.js"></script>
+    <script src="js/Cuentas.js"></script>
     <script src="js/App.js"></script>
 
 </body>
