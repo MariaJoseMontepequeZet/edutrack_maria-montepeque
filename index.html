@@ -161,11 +161,6 @@
             gap: 1rem;
         }
 
-        .placeholder-section__icon {
-            font-size: 3.5rem;
-            opacity: 0.3;
-        }
-
         .placeholder-section__title {
             font-family: var(--font-display);
             font-size: 1.4rem;
@@ -203,7 +198,7 @@
                     <a href="#cursos-landing">Cursos</a>
                     <a href="#features">Beneficios</a>
                 </div>
-                <button class="btn btn-primary" onclick="window.EduTrack.mostrarVista('login')">Iniciar Sesión</button>
+                <button class="btn btn-primary" data-action="ir-login">Iniciar Sesión</button>
             </div>
         </nav>
 
@@ -213,7 +208,7 @@
                 <p>La plataforma líder en capacitación y monitoreo analítico de estudiantes. Potencia tus habilidades
                     técnicas en desarrollo web, bases de datos y cloud computing de manera guiada.</p>
                 <div class="hero-cta">
-                    <button class="btn btn-primary" onclick="window.EduTrack.mostrarVista('login')">Acceder al Panel
+                    <button class="btn btn-primary" data-action="ir-login">Acceder al Panel
                         Administrativo →</button>
                 </div>
             </div>
@@ -306,19 +301,16 @@
 
             <div class="features-grid">
                 <div class="feature-item">
-                    <div class="feature-icon">📊</div>
                     <h3>Control Analítico (KPIs)</h3>
                     <p>Monitoreo inmediato de ingresos generados, estudiantes activos y promedios generales calculados
                         dinámicamente.</p>
                 </div>
                 <div class="feature-item">
-                    <div class="feature-icon">🛡️</div>
                     <h3>Meta-Validación Rigurosa</h3>
                     <p>Filtros estricto que aíslan datos corruptos, detectan duplicidades y asocian coherentemente
                         planes con montos reales.</p>
                 </div>
                 <div class="feature-item">
-                    <div class="feature-icon">🚪</div>
                     <h3>Control de Sesión SPA</h3>
                     <p>Enrutamiento reactivo que cambia de entorno de forma fluida mediante animaciones integradas y
                         seguras.</p>
@@ -386,27 +378,27 @@
                         <li class="db-sidebar__nav-item">
                             <a href="#" class="db-sidebar__nav-link db-sidebar__nav-link--active"
                                 data-section="dashboard" aria-current="page">
-                                <span class="db-sidebar__nav-icon">📊</span> Dashboard
+                                <span class="db-sidebar__nav-icon" data-icono="panel"></span> Dashboard
                             </a>
                         </li>
                         <li class="db-sidebar__nav-item">
                             <a href="#" class="db-sidebar__nav-link" data-section="estudiantes">
-                                <span class="db-sidebar__nav-icon">👥</span> Estudiantes
+                                <span class="db-sidebar__nav-icon" data-icono="usuarios"></span> Estudiantes
                             </a>
                         </li>
                         <li class="db-sidebar__nav-item">
                             <a href="#" class="db-sidebar__nav-link" data-section="cursos">
-                                <span class="db-sidebar__nav-icon">📚</span> Cursos
+                                <span class="db-sidebar__nav-icon" data-icono="libro"></span> Cursos
                             </a>
                         </li>
                         <li class="db-sidebar__nav-item">
                             <a href="#" class="db-sidebar__nav-link" data-section="reportes">
-                                <span class="db-sidebar__nav-icon">📈</span> Reportes
+                                <span class="db-sidebar__nav-icon" data-icono="tendencia"></span> Reportes
                             </a>
                         </li>
                         <li class="db-sidebar__nav-item">
                             <a href="#" class="db-sidebar__nav-link" data-section="configuracion">
-                                <span class="db-sidebar__nav-icon">⚙️</span> Configuración
+                                <span class="db-sidebar__nav-icon" data-icono="ajustes"></span> Configuración
                             </a>
                         </li>
                     </ul>
@@ -423,7 +415,7 @@
                 </div>
 
                 <button id="btnLogout" class="db-sidebar__logout" aria-label="Cerrar sesión">
-                    🚪 Cerrar sesión
+                    <span data-icono="salir"></span> Cerrar sesión
                 </button>
 
             </aside>
@@ -441,7 +433,7 @@
 
                     <div class="db-topbar__greeting">
                         <p class="db-topbar__title">
-                            Hola, <span class="db-topbar__name" id="greetingNombre">Estudiante</span> 👋
+                            Hola, <span class="db-topbar__name" id="greetingNombre">Estudiante</span>
                         </p>
                         <p class="db-topbar__date" id="topbarFecha"></p>
                     </div>
@@ -450,16 +442,16 @@
                         <div class="notif-wrapper">
                             <button id="btnNotificaciones" class="db-topbar__icon-btn" aria-label="Abrir notificaciones"
                                 aria-haspopup="true" aria-expanded="false">
-                                🔔
+                                <span data-icono="campana"></span>
                             </button>
                             <span id="notifBadge" class="notif-badge" aria-hidden="true" style="display:none"></span>
 
                             <div id="notifPanel" class="notif-panel" role="dialog" aria-label="Notificaciones"
                                 aria-modal="false">
                                 <div class="notif-panel__header">
-                                    <h2 class="notif-panel__title">🔔 Notificaciones</h2>
-                                    <button class="notif-panel__close" onclick="EduTrack.cerrarPanelNotificaciones()"
-                                        aria-label="Cerrar notificaciones">✕</button>
+                                    <h2 class="notif-panel__title">Notificaciones</h2>
+                                    <button class="notif-panel__close" data-action="cerrar-notificaciones"
+                                        aria-label="Cerrar notificaciones">×</button>
                                 </div>
                                 <div id="notifPanelContent" class="notif-panel__list" aria-live="polite">
                                     <p class="notif-empty">Cargando…</p>
@@ -482,7 +474,7 @@
                                 <article class="db-kpi-card db-kpi-card--yellow" aria-label="Estudiantes activos">
                                     <div class="db-kpi-card__header">
                                         <div class="db-kpi-card__icon-wrap db-kpi-card__icon-wrap--yellow"
-                                            aria-hidden="true">📚</div>
+                                            aria-hidden="true" data-icono="libro"></div>
                                         <span class="db-kpi-card__badge db-kpi-card__badge--orange">En curso</span>
                                     </div>
                                     <div class="db-kpi-card__body">
@@ -499,7 +491,7 @@
                                     role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                                     <div class="db-kpi-card__header">
                                         <div class="db-kpi-card__icon-wrap db-kpi-card__icon-wrap--blue"
-                                            aria-hidden="true">📈</div>
+                                            aria-hidden="true" data-icono="tendencia"></div>
                                         <span class="db-kpi-card__badge db-kpi-card__badge--blue">Promedio</span>
                                     </div>
                                     <div class="db-kpi-card__body">
@@ -524,7 +516,7 @@
                                 <article class="db-kpi-card db-kpi-card--purple" aria-label="Total de estudiantes">
                                     <div class="db-kpi-card__header">
                                         <div class="db-kpi-card__icon-wrap db-kpi-card__icon-wrap--purple"
-                                            aria-hidden="true">👥</div>
+                                            aria-hidden="true" data-icono="usuarios"></div>
                                         <span class="db-kpi-card__badge db-kpi-card__badge--blue">Total</span>
                                     </div>
                                     <div class="db-kpi-card__body">
@@ -565,7 +557,7 @@
 
                         <div class="toolbar" role="search" aria-label="Filtros de estudiantes">
                             <div class="toolbar__search-wrap">
-                                <span class="toolbar__search-icon" aria-hidden="true">🔍</span>
+                                <span class="toolbar__search-icon" aria-hidden="true" data-icono="buscar"></span>
                                 <input type="text" id="searchInput" placeholder="Buscar por nombre o email…"
                                     autocomplete="off" aria-label="Buscar estudiante" />
                             </div>
@@ -605,7 +597,6 @@
                     </div>
                     <div id="secCursos" class="db-section db-section--hidden">
                         <div class="placeholder-section">
-                            <div class="placeholder-section__icon">📚</div>
                             <p class="placeholder-section__title">Cursos</p>
                             <p>El catálogo de cursos está en desarrollo. Aquí podrás gestionar todos los cursos de
                                 StudentScope MJ.</p>
@@ -614,7 +605,6 @@
 
                     <div id="secReportes" class="db-section db-section--hidden">
                         <div class="placeholder-section">
-                            <div class="placeholder-section__icon">📈</div>
                             <p class="placeholder-section__title">Reportes</p>
                             <p>Los reportes analíticos estarán disponibles próximamente.</p>
                         </div>
@@ -622,7 +612,6 @@
 
                     <div id="secConfiguracion" class="db-section db-section--hidden">
                         <div class="placeholder-section">
-                            <div class="placeholder-section__icon">⚙️</div>
                             <p class="placeholder-section__title">Configuración</p>
                             <p>Ajustes del sistema y preferencias de la plataforma.</p>
                         </div>
@@ -636,7 +625,7 @@
         <div class="modal">
             <div class="modal__header">
                 <h2 class="modal__title" id="modalTitulo">Agregar Estudiante</h2>
-                <button class="modal__close" onclick="EduTrack.cerrarModal()" aria-label="Cerrar">✕</button>
+                <button class="modal__close" data-action="cerrar-modal" aria-label="Cerrar">×</button>
             </div>
             <form id="formEstudiante" class="form-modal" novalidate>
                 <fieldset style="border:none;padding:0;margin:0;display:contents;">
@@ -725,9 +714,9 @@
                     </label>
                 </fieldset>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="EduTrack.cerrarModal()">Cancelar</button>
+                    <button type="button" class="btn btn-secondary" data-action="cerrar-modal">Cancelar</button>
                     <button type="button" class="btn btn-primary"
-                        onclick="EduTrack.guardarEstudiante()">Guardar</button>
+                        data-action="guardar-estudiante">Guardar</button>
                 </div>
             </form>
         </div>
@@ -737,12 +726,12 @@
     <div id="confirmOverlay" class="confirm-overlay" role="alertdialog" aria-modal="true"
         aria-labelledby="confirmTitulo">
         <div class="confirm-box">
-            <div class="confirm-box__icon" aria-hidden="true">⚠️</div>
+            <div class="confirm-box__icon" aria-hidden="true" data-icono="alerta"></div>
             <h3 class="confirm-box__title" id="confirmTitulo">¿Eliminar?</h3>
             <p class="confirm-box__msg" id="confirmMsg"></p>
             <div class="confirm-actions">
-                <button class="btn btn-secondary" onclick="EduTrack.cerrarConfirm()">Cancelar</button>
-                <button class="btn btn-danger" onclick="EduTrack.ejecutarConfirm()">Sí, eliminar</button>
+                <button class="btn btn-secondary" data-action="cerrar-confirm">Cancelar</button>
+                <button class="btn btn-danger" data-action="ejecutar-confirm">Sí, eliminar</button>
             </div>
         </div>
     </div>
@@ -753,6 +742,8 @@
 
     <script src="js/Sidebar.js"></script>
     <script src="js/Validacion.js"></script>
+    <script src="js/Escapar.js"></script>
+    <script src="js/Iconos.js"></script>
     <script src="js/App.js"></script>
 
 </body>
