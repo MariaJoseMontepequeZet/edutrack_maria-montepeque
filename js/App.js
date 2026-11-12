@@ -8,6 +8,9 @@
 (function () {
     'use strict';
 
+    const esc = window.EduTrack.escaparHTML;
+    const num = window.EduTrack.aNumero;
+
     var DATASET_INICIAL = [
         { id: 1, nombre: 'Juan', apellido: 'Pérez', email: 'pjuan5058@gmail.com', ciudad: 'Bogotá', curso: 'Desarrollo Web', progreso: 75, fechaInscripcion: '2023-01-15', plan: 'Premium', montoUSD: 99.99, activo: true },
         { id: 2, nombre: 'María', apellido: 'Gómez', email: 'maria.gomez91@gmail.com', ciudad: 'Medellín', curso: 'Diseño UX/UI', progreso: 60, fechaInscripcion: '2023-02-20', plan: 'Básico', montoUSD: 29.99, activo: true },
@@ -247,7 +250,11 @@
     }
     function iniciales(n, a) { return ((n[0] || '') + (a[0] || '')).toUpperCase(); }
     function progresoClass(p) { return p >= 100 ? 'progress-fill--complete' : p < 40 ? 'progress-fill--low' : ''; }
-    function formatFecha(d) { if (!d) return '—'; var p = d.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+    function formatFecha(d) {
+        if (typeof d !== 'string') return '—';
+        var p = d.split('-');
+        return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : '—';
+    }
 
     function renderizarCards(lista) {
         var grid = document.getElementById('studentsGrid');
@@ -265,27 +272,27 @@
         var paginaDatos = lista.slice(inicio, fin);
         grid.innerHTML = paginaDatos.map(function (e, i) {
             return '<article class="student-card' + (e.activo ? '' : ' student-card--inactive') + '" ' +
-                'style="animation-delay:' + Math.min(i * 30, 300) + 'ms" data-id="' + e.id + '">' +
+                'style="animation-delay:' + Math.min(i * 30, 300) + 'ms" data-id="' + num(e.id) + '">' +
                 '<div class="card-header">' +
-                '<div class="card-avatar">' + iniciales(e.nombre, e.apellido) + '</div>' +
+                '<div class="card-avatar">' + esc(iniciales(e.nombre, e.apellido)) + '</div>' +
                 '<div class="card-info">' +
-                '<p class="card-name">' + e.nombre + ' ' + e.apellido + '</p>' +
-                '<p class="card-email">' + e.email + '</p>' +
+                '<p class="card-name">' + esc(e.nombre + ' ' + e.apellido) + '</p>' +
+                '<p class="card-email">' + esc(e.email) + '</p>' +
                 '</div>' +
-                '<span class="plan-badge plan-badge--' + planSlug(e.plan) + '">' + e.plan + '</span>' +
+                '<span class="plan-badge plan-badge--' + esc(planSlug(e.plan)) + '">' + esc(e.plan) + '</span>' +
                 '</div>' +
                 '<div class="card-body">' +
-                '<div class="card-detail"><span class="card-detail__icon">📍</span><span>' + e.ciudad + '</span></div>' +
-                '<div class="card-detail"><span class="card-detail__icon">💻</span><span>' + e.curso + '</span></div>' +
-                '<div class="card-detail"><span class="card-detail__icon">📅</span><span>' + formatFecha(e.fechaInscripcion) + '</span></div>' +
+                '<div class="card-detail"><span class="card-detail__icon">📍</span><span>' + esc(e.ciudad) + '</span></div>' +
+                '<div class="card-detail"><span class="card-detail__icon">💻</span><span>' + esc(e.curso) + '</span></div>' +
+                '<div class="card-detail"><span class="card-detail__icon">📅</span><span>' + esc(formatFecha(e.fechaInscripcion)) + '</span></div>' +
                 '</div>' +
                 '<div class="progress-wrap">' +
-                '<div class="progress-label"><span>Progreso</span><strong>' + e.progreso + '%</strong></div>' +
-                '<div class="progress-track"><div class="progress-fill ' + progresoClass(e.progreso) + '" style="width:' + e.progreso + '%"></div></div>' +
+                '<div class="progress-label"><span>Progreso</span><strong>' + num(e.progreso) + '%</strong></div>' +
+                '<div class="progress-track"><div class="progress-fill ' + progresoClass(num(e.progreso)) + '" style="width:' + num(e.progreso) + '%"></div></div>' +
                 '</div>' +
                 '<div class="card-actions">' +
-                '<button class="btn btn-secondary btn--sm" onclick="EduTrack.abrirModal(' + e.id + ')">✏️ Editar</button>' +
-                '<button class="btn btn-danger btn--sm" onclick="EduTrack.eliminarEstudiante(' + e.id + ')">🗑 Eliminar</button>' +
+                '<button class="btn btn-secondary btn--sm" data-action="editar" data-id="' + num(e.id) + '">✏️ Editar</button>' +
+                '<button class="btn btn-danger btn--sm" data-action="eliminar" data-id="' + num(e.id) + '">🗑 Eliminar</button>' +
                 '</div>' +
                 '</article>';
         }).join('');
@@ -307,9 +314,9 @@
         var bA = state.paginaActual === 1 ? 'disabled' : '';
         var bS = state.paginaActual === totalPaginas ? 'disabled' : '';
         container.innerHTML =
-            '<button class="btn btn-secondary btn--sm" onclick="EduTrack.cambiarPagina(' + (state.paginaActual - 1) + ')" ' + bA + '>← Anterior</button>' +
+            '<button class="btn btn-secondary btn--sm" data-action="pagina" data-page="' + (state.paginaActual - 1) + '" ' + bA + '>← Anterior</button>' +
             '<span class="pagination__info">Página ' + state.paginaActual + ' de ' + totalPaginas + '</span>' +
-            '<button class="btn btn-secondary btn--sm" onclick="EduTrack.cambiarPagina(' + (state.paginaActual + 1) + ')" ' + bS + '>Siguiente →</button>';
+            '<button class="btn btn-secondary btn--sm" data-action="pagina" data-page="' + (state.paginaActual + 1) + '" ' + bS + '>Siguiente →</button>';
     }
 
     function cambiarPagina(p) {
@@ -469,7 +476,7 @@
         var e = state.estudiantes.find(function (x) { return x.id === id; }); if (!e) return;
         abrirConfirm(
             '¿Eliminar estudiante?',
-            'Vas a eliminar a <strong>' + e.nombre + ' ' + e.apellido + '</strong>. Esta acción no se puede deshacer.',
+            'Vas a eliminar a <strong>' + esc(e.nombre + ' ' + e.apellido) + '</strong>. Esta acción no se puede deshacer.',
             function () {
                 state.estudiantes = state.estudiantes.filter(function (x) { return x.id !== id; });
                 guardarDatos(); poblarSelectCiudades(); filtrar(); actualizarKPIs(); actualizarGrafico();
@@ -675,11 +682,11 @@
 
     function kpiBox(icon, label, value, sub, bgVar, borderVar, colorVar) {
         return '<article class="rep-kpi-box" style="background:var(' + bgVar + ');border-color:var(' + borderVar + ')">' +
-            '<div class="rep-kpi-icon" style="color:var(' + colorVar + ')">' + icon + '</div>' +
+            '<div class="rep-kpi-icon" style="color:var(' + colorVar + ')">' + esc(icon) + '</div>' +
             '<div class="rep-kpi-body">' +
-            '<p class="rep-kpi-label">' + label + '</p>' +
-            '<p class="rep-kpi-value" style="color:var(' + colorVar + ')">' + value + '</p>' +
-            '<p class="rep-kpi-sub">' + sub + '</p>' +
+            '<p class="rep-kpi-label">' + esc(label) + '</p>' +
+            '<p class="rep-kpi-value" style="color:var(' + colorVar + ')">' + esc(value) + '</p>' +
+            '<p class="rep-kpi-sub">' + esc(sub) + '</p>' +
             '</div></article>';
     }
 
@@ -688,14 +695,14 @@
         var rows = top.map(function (e, i) {
             return '<tr class="db-table__row">' +
                 '<td class="db-table__td"><strong>' + (i + 1) + '</strong></td>' +
-                '<td class="db-table__td">' + e.nombre + ' ' + e.apellido + '</td>' +
-                '<td class="db-table__td">' + e.curso + '</td>' +
+                '<td class="db-table__td">' + esc(e.nombre + ' ' + e.apellido) + '</td>' +
+                '<td class="db-table__td">' + esc(e.curso) + '</td>' +
                 '<td class="db-table__td">' +
                 '<div style="display:flex;align-items:center;gap:.5rem">' +
                 '<div style="flex:1;height:6px;background:var(--color-bg-elevated);border-radius:999px;overflow:hidden">' +
-                '<div style="width:' + e.progreso + '%;height:100%;background:var(--color-accent-primary);border-radius:999px"></div>' +
-                '</div><strong>' + e.progreso + '%</strong></div></td>' +
-                '<td class="db-table__td"><span class="plan-badge plan-badge--' + planSlug(e.plan) + '">' + e.plan + '</span></td>' +
+                '<div style="width:' + num(e.progreso) + '%;height:100%;background:var(--color-accent-primary);border-radius:999px"></div>' +
+                '</div><strong>' + num(e.progreso) + '%</strong></div></td>' +
+                '<td class="db-table__td"><span class="plan-badge plan-badge--' + esc(planSlug(e.plan)) + '">' + esc(e.plan) + '</span></td>' +
                 '</tr>';
         }).join('');
         return '<table class="db-table" style="min-width:520px">' +
@@ -809,7 +816,7 @@
             '<input type="email" class="form-input config-input" id="cfgEmail" value="admin@edutrack.co" /></div>' +
             '<div class="form-group"><label class="config-label">Cargo</label>' +
             '<input type="text" class="form-input config-input" id="cfgCargo" value="Administrador General" /></div>' +
-            '<button class="btn btn-primary" onclick="EduTrack.guardarPerfil()">💾 Guardar perfil</button>' +
+            '<button class="btn btn-primary" data-action="guardar-perfil">💾 Guardar perfil</button>' +
             '</div></section>' +
 
             /* Tarjeta: Seguridad */
@@ -822,7 +829,7 @@
             '<input type="password" class="form-input config-input" id="cfgPassNueva" placeholder="••••••••" /></div>' +
             '<div class="form-group"><label class="config-label">Confirmar contraseña</label>' +
             '<input type="password" class="form-input config-input" id="cfgPassConfirm" placeholder="••••••••" /></div>' +
-            '<button class="btn btn-primary" onclick="EduTrack.cambiarPassword()">🔑 Cambiar contraseña</button>' +
+            '<button class="btn btn-primary" data-action="cambiar-password">🔑 Cambiar contraseña</button>' +
             '</div></section>' +
 
             /* Tarjeta: Notificaciones */
@@ -835,7 +842,7 @@
             toggleRow('notifInactivos', 'Recordatorio de inactivos', false) +
             toggleRow('notifReportes', 'Reportes semanales automáticos', false) +
             '</div>' +
-            '<button class="btn btn-primary" style="margin-top:1.25rem" onclick="EduTrack.guardarNotificaciones()">💾 Guardar preferencias</button>' +
+            '<button class="btn btn-primary" style="margin-top:1.25rem" data-action="guardar-notificaciones">💾 Guardar preferencias</button>' +
             '</section>' +
 
             /* Tarjeta: Sistema */
@@ -845,17 +852,17 @@
             '<div class="config-action-row">' +
             '<div><p class="config-action-title">Exportar estudiantes (JSON)</p>' +
             '<p class="config-action-sub">Descarga todos los registros en formato JSON</p></div>' +
-            '<button class="btn btn-secondary" onclick="EduTrack.exportarJSON()">📥 Exportar</button>' +
+            '<button class="btn btn-secondary" data-action="exportar-json">📥 Exportar</button>' +
             '</div>' +
             '<div class="config-action-row">' +
             '<div><p class="config-action-title">Exportar estudiantes (CSV)</p>' +
             '<p class="config-action-sub">Compatible con Excel y Google Sheets</p></div>' +
-            '<button class="btn btn-secondary" onclick="EduTrack.exportarCSV()">📊 Exportar CSV</button>' +
+            '<button class="btn btn-secondary" data-action="exportar-csv">📊 Exportar CSV</button>' +
             '</div>' +
             '<div class="config-action-row config-action-row--danger">' +
             '<div><p class="config-action-title">Restablecer datos</p>' +
             '<p class="config-action-sub">Elimina todos los cambios y restaura los 35 registros originales</p></div>' +
-            '<button class="btn btn-danger" onclick="EduTrack.restablecerDatos()">🔄 Restablecer</button>' +
+            '<button class="btn btn-danger" data-action="restablecer-datos">🔄 Restablecer</button>' +
             '</div>' +
             '</div>' +
             '<p class="config-version">StudentScope MJ v2.3 · Vanilla JS · CSS Puro · Sin frameworks</p>' +
@@ -978,7 +985,10 @@
         var icons = { success: '✓', error: '✕', info: '★' };
         var t = document.getElementById('toast'); if (!t) return;
         t.className = 'toast toast--' + (tipo || 'success');
-        t.innerHTML = '<span class="toast__icon">' + (icons[tipo] || '✓') + '</span> ' + msg;
+        const icono = document.createElement('span');
+        icono.className = 'toast__icon';
+        icono.textContent = icons[tipo] || '✓';
+        t.replaceChildren(icono, document.createTextNode(' ' + msg));
         t.classList.add('is-visible');
         clearTimeout(_toastTimer);
         _toastTimer = setTimeout(function () { t.classList.remove('is-visible'); }, 3000);
@@ -1089,13 +1099,13 @@
             return '<div class="notif-item" style="background:' + c.bg + ';border-color:' + c.border + '">' +
                 '<div class="notif-item__left">' +
                 '<span class="notif-dot" style="background:' + c.dot + '"></span>' +
-                '<span class="notif-icono">' + n.icono + '</span>' +
+                '<span class="notif-icono">' + esc(n.icono) + '</span>' +
                 '</div>' +
                 '<div class="notif-item__body">' +
-                '<p class="notif-titulo">' + n.titulo + '</p>' +
-                '<p class="notif-texto">' + n.texto + '</p>' +
+                '<p class="notif-titulo">' + esc(n.titulo) + '</p>' +
+                '<p class="notif-texto">' + esc(n.texto) + '</p>' +
                 '</div>' +
-                '<span class="notif-tiempo">' + n.tiempo + '</span>' +
+                '<span class="notif-tiempo">' + esc(n.tiempo) + '</span>' +
                 '</div>';
         }).join('');
 
@@ -1210,7 +1220,32 @@
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') { cerrarModal(); cerrarConfirm(); }
         });
+
+        document.addEventListener('click', function (e) {
+            const elemento = e.target.closest('[data-action]');
+            if (!elemento || elemento.disabled) return;
+            const accion = ACCIONES[elemento.getAttribute('data-action')];
+            if (accion) accion(elemento);
+        });
     }
+
+    const ACCIONES = {
+        'ir-login': function () { mostrarVista('login'); },
+        'editar': function (el) { abrirModal(num(el.getAttribute('data-id'))); },
+        'eliminar': function (el) { eliminarEstudiante(num(el.getAttribute('data-id'))); },
+        'pagina': function (el) { cambiarPagina(num(el.getAttribute('data-page'))); },
+        'cerrar-modal': function () { cerrarModal(); },
+        'guardar-estudiante': function () { guardarEstudiante(); },
+        'cerrar-confirm': function () { cerrarConfirm(); },
+        'ejecutar-confirm': function () { ejecutarConfirm(); },
+        'cerrar-notificaciones': function () { cerrarPanelNotificaciones(); },
+        'guardar-perfil': function () { guardarPerfil(); },
+        'cambiar-password': function () { cambiarPassword(); },
+        'guardar-notificaciones': function () { guardarNotificaciones(); },
+        'exportar-json': function () { exportarJSON(); },
+        'exportar-csv': function () { exportarCSV(); },
+        'restablecer-datos': function () { restablecerDatos(); }
+    };
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);

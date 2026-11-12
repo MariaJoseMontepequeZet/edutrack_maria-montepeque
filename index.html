@@ -203,7 +203,7 @@
                     <a href="#cursos-landing">Cursos</a>
                     <a href="#features">Beneficios</a>
                 </div>
-                <button class="btn btn-primary" onclick="window.EduTrack.mostrarVista('login')">Iniciar Sesión</button>
+                <button class="btn btn-primary" data-action="ir-login">Iniciar Sesión</button>
             </div>
         </nav>
 
@@ -213,7 +213,7 @@
                 <p>La plataforma líder en capacitación y monitoreo analítico de estudiantes. Potencia tus habilidades
                     técnicas en desarrollo web, bases de datos y cloud computing de manera guiada.</p>
                 <div class="hero-cta">
-                    <button class="btn btn-primary" onclick="window.EduTrack.mostrarVista('login')">Acceder al Panel
+                    <button class="btn btn-primary" data-action="ir-login">Acceder al Panel
                         Administrativo →</button>
                 </div>
             </div>
@@ -458,7 +458,7 @@
                                 aria-modal="false">
                                 <div class="notif-panel__header">
                                     <h2 class="notif-panel__title">🔔 Notificaciones</h2>
-                                    <button class="notif-panel__close" onclick="EduTrack.cerrarPanelNotificaciones()"
+                                    <button class="notif-panel__close" data-action="cerrar-notificaciones"
                                         aria-label="Cerrar notificaciones">✕</button>
                                 </div>
                                 <div id="notifPanelContent" class="notif-panel__list" aria-live="polite">
@@ -636,7 +636,7 @@
         <div class="modal">
             <div class="modal__header">
                 <h2 class="modal__title" id="modalTitulo">Agregar Estudiante</h2>
-                <button class="modal__close" onclick="EduTrack.cerrarModal()" aria-label="Cerrar">✕</button>
+                <button class="modal__close" data-action="cerrar-modal" aria-label="Cerrar">✕</button>
             </div>
             <form id="formEstudiante" class="form-modal" novalidate>
                 <fieldset style="border:none;padding:0;margin:0;display:contents;">
@@ -725,9 +725,9 @@
                     </label>
                 </fieldset>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="EduTrack.cerrarModal()">Cancelar</button>
+                    <button type="button" class="btn btn-secondary" data-action="cerrar-modal">Cancelar</button>
                     <button type="button" class="btn btn-primary"
-                        onclick="EduTrack.guardarEstudiante()">Guardar</button>
+                        data-action="guardar-estudiante">Guardar</button>
                 </div>
             </form>
         </div>
@@ -741,8 +741,8 @@
             <h3 class="confirm-box__title" id="confirmTitulo">¿Eliminar?</h3>
             <p class="confirm-box__msg" id="confirmMsg"></p>
             <div class="confirm-actions">
-                <button class="btn btn-secondary" onclick="EduTrack.cerrarConfirm()">Cancelar</button>
-                <button class="btn btn-danger" onclick="EduTrack.ejecutarConfirm()">Sí, eliminar</button>
+                <button class="btn btn-secondary" data-action="cerrar-confirm">Cancelar</button>
+                <button class="btn btn-danger" data-action="ejecutar-confirm">Sí, eliminar</button>
             </div>
         </div>
     </div>
@@ -753,6 +753,7 @@
 
     <script src="js/Sidebar.js"></script>
     <script src="js/Validacion.js"></script>
+    <script src="js/Escapar.js"></script>
     <script src="js/App.js"></script>
 
 </body>

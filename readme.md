@@ -49,6 +49,7 @@ Hecho por María José Montepeque Zet.
 | `js/App.js` | Lógica principal: enrutador, CRUD, gráficas, cursos, reportes, configuración y notificaciones. |
 | `js/Sidebar.js` | Control del menú lateral: eventos, accesibilidad y cambio de tamaño. |
 | `js/Validacion.js` | Motor de validación del dataset con 20 reglas de negocio. |
+| `js/Escapar.js` | Utilidades de seguridad: escape de HTML y conversión segura a número. |
 | `json/Datos.json` | Copia del dataset inicial de 35 estudiantes, igual al de `App.js`. |
 
 ---
@@ -72,6 +73,8 @@ Cada archivo usa una IIFE para no contaminar el objeto global. Solo se expone lo
 
 * **Estado centralizado:** `App.js` mantiene un objeto `state` con la vista actual, los estudiantes, los filtros y las instancias de las gráficas.
 * **Renderizado:** los componentes se vuelven a pintar con plantillas de texto cuando cambia el estado.
+* **Seguridad:** todo dato de estudiante que se inserta en una plantilla pasa por `escaparHTML()` (o `aNumero()` si es numérico), y los mensajes emergentes se crean con nodos de texto. Así un nombre como `<img src=x onerror=...>` se muestra como texto y no se ejecuta.
+* **Eventos:** no hay manejadores en línea (`onclick`). Los botones declaran `data-action` (y `data-id` o `data-page` cuando hace falta) y un único oyente de clic en `App.js` ejecuta la acción correspondiente. Esto permite una política de seguridad de contenido sin `unsafe-inline` en los scripts.
 
 ---
 
@@ -128,3 +131,9 @@ La configuración del servidor (Docker Compose, Caddy y secretos) vive fuera del
 ### Despliegue automatico
 * Se agrega el workflow `desplegar.yml`, que despliega en el servidor con cada push a `main`.
 * Se documenta el flujo de ramas y qué archivos se publican.
+
+### Día 2 - Seguridad contra XSS
+* Se agrega `js/Escapar.js` y se escapan los datos de estudiantes en tarjetas, tabla Top 10, notificaciones, confirmaciones y reportes.
+* Los mensajes emergentes se construyen con nodos de texto en lugar de `innerHTML`.
+* Se eliminan los `onclick` en línea de `index.html` y `App.js`; se reemplazan por `data-action` con un único oyente de clic.
+* `formatFecha` ya no falla cuando la fecha no es una cadena.
