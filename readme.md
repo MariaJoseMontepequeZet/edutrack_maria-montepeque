@@ -50,6 +50,7 @@ Hecho por María José Montepeque Zet.
 | `js/Sidebar.js` | Control del menú lateral: eventos, accesibilidad y cambio de tamaño. |
 | `js/Validacion.js` | Motor de validación del dataset con 20 reglas de negocio. |
 | `js/Escapar.js` | Utilidades de seguridad: escape de HTML y conversión segura a número. |
+| `js/Iconos.js` | Iconos SVG propios y función que los inserta en los elementos con `data-icono`. |
 | `json/Datos.json` | Copia del dataset inicial de 35 estudiantes, igual al de `App.js`. |
 
 ---
@@ -74,6 +75,7 @@ Cada archivo usa una IIFE para no contaminar el objeto global. Solo se expone lo
 * **Estado centralizado:** `App.js` mantiene un objeto `state` con la vista actual, los estudiantes, los filtros y las instancias de las gráficas.
 * **Renderizado:** los componentes se vuelven a pintar con plantillas de texto cuando cambia el estado.
 * **Seguridad:** todo dato de estudiante que se inserta en una plantilla pasa por `escaparHTML()` (o `aNumero()` si es numérico), y los mensajes emergentes se crean con nodos de texto. Así un nombre como `<img src=x onerror=...>` se muestra como texto y no se ejecuta.
+* **Iconos:** la interfaz no usa emojis. Los iconos son SVG definidos en `Iconos.js`; el HTML los pide con `data-icono="nombre"` y las plantillas de JavaScript con `EduTrack.icono('nombre')`.
 * **Eventos:** no hay manejadores en línea (`onclick`). Los botones declaran `data-action` (y `data-id` o `data-page` cuando hace falta) y un único oyente de clic en `App.js` ejecuta la acción correspondiente. Esto permite una política de seguridad de contenido sin `unsafe-inline` en los scripts.
 
 ---
@@ -137,3 +139,5 @@ La configuración del servidor (Docker Compose, Caddy y secretos) vive fuera del
 * Los mensajes emergentes se construyen con nodos de texto en lugar de `innerHTML`.
 * Se eliminan los `onclick` en línea de `index.html` y `App.js`; se reemplazan por `data-action` con un único oyente de clic.
 * `formatFecha` ya no falla cuando la fecha no es una cadena.
+* Se eliminan los emojis de la interfaz y se reemplazan por iconos SVG (`js/Iconos.js`) donde el emoji era el único contenido de un botón o recuadro.
+* Se corrige la superposición de la lupa con el texto del buscador de estudiantes.

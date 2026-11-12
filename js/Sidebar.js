@@ -2,7 +2,7 @@
  * StudentScope MJ — sidebar.js
  * Controla el sidebar colapsable del dashboard.
  * Correcciones v2:
- * - Añade .is-active al botón hamburger (animación ☰ → X en CSS)
+ * - Añade .is-active al botón hamburger (animación de hamburguesa a X en CSS)
  * - BREAKPOINT_LG alineado con el CSS (768px)
  * - Cierra el sidebar al navegar en mobile
  */
@@ -48,7 +48,7 @@
 
         sidebar.classList.add('is-open');
 
-        /* BUG FIX: añadir is-active al botón para la animación ☰ → X */
+        /* BUG FIX: añadir is-active al botón para la animación de hamburguesa a X */
         if (hamburger) {
             hamburger.classList.add('is-active');
             hamburger.setAttribute('aria-expanded', 'true');
