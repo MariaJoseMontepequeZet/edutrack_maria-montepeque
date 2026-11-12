@@ -221,7 +221,7 @@
 
     function guardarDatos() {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.estudiantes)); }
-        catch (e) { showToast('Error al guardar', 'error'); }
+        catch { showToast('Error al guardar', 'error'); }
     }
 
     /* ════════════════════════════════════════════
@@ -637,7 +637,6 @@
 
         var total = state.estudiantes.length;
         var activos = state.estudiantes.filter(function (e) { return e.activo; }).length;
-        var inactivos = total - activos;
         var avg = total ? Math.round(state.estudiantes.reduce(function (s, e) { return s + e.progreso; }, 0) / total) : 0;
         var ingresos = state.estudiantes.reduce(function (s, e) { return s + e.montoUSD; }, 0).toFixed(2);
         var completos = state.estudiantes.filter(function (e) { return e.progreso === 100; }).length;
