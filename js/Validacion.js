@@ -95,7 +95,7 @@
     };
 
     /** Expresión regular para validar formato de email */
-    var REGEX_EMAIL = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+    var REGEX_EMAIL = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     /** Expresión regular para validar formato de fecha ISO YYYY-MM-DD */
     var REGEX_FECHA_ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -144,8 +144,11 @@
     function esFechaISOValida(cadena) {
         if (typeof cadena !== 'string') return false;
         if (!REGEX_FECHA_ISO.test(cadena)) return false;
-        var fecha = new Date(cadena);
-        return !isNaN(fecha.getTime());
+        var partes = cadena.split('-').map(Number);
+        var fecha = new Date(Date.UTC(partes[0], partes[1] - 1, partes[2]));
+        return fecha.getUTCFullYear() === partes[0] &&
+            fecha.getUTCMonth() === partes[1] - 1 &&
+            fecha.getUTCDate() === partes[2];
     }
 
     /**
