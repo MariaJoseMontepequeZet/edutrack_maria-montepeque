@@ -418,3 +418,125 @@ describe('separacion de registros', () => {
     expect(resultado.registrosInvalidos).toHaveLength(1);
   });
 });
+
+function unDiaDespues(iso) {
+  const [anio, mes, dia] = iso.split('-').map(Number);
+  const fecha = new Date(anio, mes - 1, dia + 1);
+  const dos = (n) => String(n).padStart(2, '0');
+  return `${fecha.getFullYear()}-${dos(fecha.getMonth() + 1)}-${dos(fecha.getDate())}`;
+}
+
+function hallazgosEn(dataset, regla, opciones) {
+  return validar.dataset(dataset, opciones).errores.filter((e) => e.regla === regla);
+}
+
+describe('V-09 la fecha maxima es hoy', () => {
+  const HOY = { hoy: '2026-11-13' };
+
+  it('acepta la fecha de hoy y fechas posteriores a 2025', () => {
+    expect(hallazgosEn(conCambios({ fechaInscripcion: '2026-11-13' }), 'V-09', HOY)).toHaveLength(
+      0
+    );
+    expect(hallazgosEn(conCambios({ fechaInscripcion: '2025-12-31' }), 'V-09', HOY)).toHaveLength(
+      0
+    );
+  });
+
+  it('rechaza el dia siguiente a hoy', () => {
+    const encontrados = hallazgosEn(conCambios({ fechaInscripcion: '2026-11-14' }), 'V-09', HOY);
+
+    expect(encontrados).toHaveLength(1);
+    expect(encontrados[0].mensaje).toContain('2026-11-13');
+  });
+
+  it('sin opciones usa el dia de hoy de la computadora', () => {
+    const hoy = validar.hoy();
+
+    expect(hoy).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(hallazgos(conCambios({ fechaInscripcion: hoy }), 'V-09')).toHaveLength(0);
+    expect(hallazgos(conCambios({ fechaInscripcion: unDiaDespues(hoy) }), 'V-09')).toHaveLength(1);
+  });
+
+  it('expone la primera fecha permitida', () => {
+    expect(validar.FECHA_MINIMA).toBe('2023-01-01');
+  });
+});
+
+describe('V-07 con el catalogo completo', () => {
+  it('acepta los 30 cursos del catalogo, incluidos los que antes se rechazaban', () => {
+    expect(CURSOS).toHaveLength(30);
+    ['TypeScript Avanzado', 'Ethical Hacking', 'Scrum & Gestión Ágil'].forEach((curso) => {
+      expect(hallazgos(conCambios({ curso }), 'V-07')).toHaveLength(0);
+    });
+  });
+});
+
+describe('datos que no son objetos', () => {
+  it('no falla con null, numeros, textos ni arreglos dentro del dataset', () => {
+    const sucio = [...datasetBase(), null, 42, 'texto', ['x']];
+    const resultado = validar.dataset(sucio);
+
+    expect(resultado.valido).toBe(false);
+    expect(resultado.totalRegistros).toBe(14);
+    expect(resultado.registrosValidos).toHaveLength(10);
+    expect(resultado.registrosInvalidos).toHaveLength(4);
+    expect(
+      resultado.errores.filter((e) => e.regla === 'V-01' && e.campo === 'registro')
+    ).toHaveLength(4);
+  });
+
+  it('un dataset con solo basura devuelve todo como invalido sin lanzar errores', () => {
+    const resultado = validar.dataset([null, undefined, 1]);
+
+    expect(resultado.registrosValidos).toHaveLength(0);
+    expect(resultado.registrosInvalidos).toHaveLength(3);
+  });
+});
+
+describe('validar un registro suelto', () => {
+  const HOY = { hoy: '2026-11-13' };
+
+  it('acepta un registro correcto', () => {
+    const resultado = validar.registro(registro(1), HOY);
+
+    expect(resultado.valido).toBe(true);
+    expect(resultado.errores).toEqual([]);
+  });
+
+  it('detecta errores por campo con la regla que los causa', () => {
+    const resultado = validar.registro(
+      registro(1, { curso: 'Curso Falso', fechaInscripcion: '2030-01-01', progreso: 120 }),
+      HOY
+    );
+    const reglas = resultado.errores.map((e) => `${e.campo}:${e.regla}`);
+
+    expect(resultado.valido).toBe(false);
+    expect(reglas).toEqual(
+      expect.arrayContaining(['curso:V-07', 'fechaInscripcion:V-09', 'progreso:V-08'])
+    );
+  });
+
+  it('las advertencias no invalidan el registro', () => {
+    const resultado = validar.registro(registro(1, { ciudad: 'Ciudad Inventada' }), HOY);
+
+    expect(resultado.valido).toBe(true);
+    expect(resultado.errores.map((e) => e.regla)).toEqual(['V-06']);
+  });
+
+  it('no aplica las reglas que comparan varios registros', () => {
+    const resultado = validar.registro(registro(1, { id: 9999, activo: true }), HOY);
+
+    expect(resultado.errores.map((e) => e.regla)).not.toEqual(
+      expect.arrayContaining(['V-14', 'V-15', 'V-17'])
+    );
+  });
+
+  it('rechaza lo que no es un objeto sin lanzar errores', () => {
+    [null, undefined, 5, 'texto', []].forEach((valor) => {
+      const resultado = validar.registro(valor, HOY);
+
+      expect(resultado.valido).toBe(false);
+      expect(resultado.errores[0].regla).toBe('V-01');
+    });
+  });
+});

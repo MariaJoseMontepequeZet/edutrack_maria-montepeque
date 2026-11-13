@@ -39,17 +39,11 @@
         'Premium': 99.99
     };
 
-    /** Cursos oficiales del catálogo StudentScope MJ */
-    var CURSOS_VALIDOS = [
-        'Desarrollo Web',
-        'Diseño UX/UI',
-        'Marketing Digital',
-        'Full Stack Web',
-        'Python y Data Science',
-        'DevOps y Cloud',
-        'React Native',
-        'SQL y Bases de Datos'
-    ];
+    /** Cursos oficiales: se toman del catálogo (js/Catalogo.js), única fuente de verdad */
+    var catalogo = (typeof module !== 'undefined' && module.exports)
+        ? require('./Catalogo.js')
+        : window.EduTrack.catalogo;
+    var CURSOS_VALIDOS = catalogo.nombres;
 
     /** Ciudades colombianas reconocidas por el sistema */
     var CIUDADES_VALIDAS = [
@@ -58,9 +52,11 @@
         'Santa Marta', 'Cúcuta', 'Villavicencio', 'Armenia'
     ];
 
-    /** Rango de fechas de inscripción permitido (inclusivo) */
-    var FECHA_MIN = new Date('2023-01-01');
-    var FECHA_MAX = new Date('2025-05-01');
+    /** Primera fecha de inscripción permitida (inclusiva). La máxima es el día de hoy. */
+    var FECHA_MIN = '2023-01-01';
+
+    /** Datos del momento de la validación; se fijan en cada llamada a dataset() o registro() */
+    var contexto = { hoy: null };
 
     /** Rango válido del campo progreso */
     var PROGRESO_MIN = 0;
@@ -165,6 +161,20 @@
     function redondear(valor, decimales) {
         var factor = Math.pow(10, decimales);
         return Math.round(valor * factor) / factor;
+    }
+
+    /** Devuelve la fecha local como cadena AAAA-MM-DD. */
+    function fechaLocalISO(fecha) {
+        var dos = function (n) { return (n < 10 ? '0' : '') + n; };
+        return fecha.getFullYear() + '-' + dos(fecha.getMonth() + 1) + '-' + dos(fecha.getDate());
+    }
+
+    function hoy() {
+        return contexto.hoy || fechaLocalISO(new Date());
+    }
+
+    function esObjeto(valor) {
+        return valor !== null && typeof valor === 'object' && !Array.isArray(valor);
     }
 
 
@@ -398,7 +408,7 @@
      * La fecha de inscripción debe:
      * a) Tener formato ISO estricto (YYYY-MM-DD)
      * b) Representar una fecha real (no 2023-02-30)
-     * c) Estar dentro del rango [FECHA_MIN, FECHA_MAX]
+     * c) Estar entre FECHA_MIN y el día de hoy (ambos inclusive)
      */
     function validarFechaInscripcion(registro) {
         var errores = [];
@@ -419,28 +429,24 @@
             return errores; // Sin fecha válida, no tiene sentido verificar el rango
         }
 
-        var fecha = new Date(raw);
-
-        if (fecha < FECHA_MIN) {
+        if (raw < FECHA_MIN) {
             errores.push(crearError(
                 'ERROR',
                 registro.id,
                 'fechaInscripcion',
                 'V-09',
-                'Fecha anterior al límite mínimo permitido (' +
-                FECHA_MIN.toISOString().slice(0, 10) + ')',
+                'Fecha anterior al límite mínimo permitido (' + FECHA_MIN + ')',
                 raw
             ));
         }
 
-        if (fecha > FECHA_MAX) {
+        if (raw > hoy()) {
             errores.push(crearError(
                 'ERROR',
                 registro.id,
                 'fechaInscripcion',
                 'V-09',
-                'Fecha posterior al límite máximo permitido (' +
-                FECHA_MAX.toISOString().slice(0, 10) + ')',
+                'Fecha posterior a hoy (' + hoy() + ')',
                 raw
             ));
         }
@@ -821,6 +827,60 @@
        5. FUNCIÓN PRINCIPAL: dataset()
        ============================================================ */
 
+    /* ============================================================
+       VALIDACIÓN DE UN SOLO REGISTRO
+       ============================================================ */
+    var VALIDADORES_POR_REGISTRO = [
+        validarCamposRequeridos,       // V-01 — campos presentes
+        validarTipos,                  // V-02 — tipos de dato
+        validarId,                     // V-03 — ID entero positivo
+        validarEmail,                  // V-04 — formato email
+        validarNombres,                // V-05 — nombre y apellido no vacíos
+        validarCiudad,                 // V-06 — ciudad en listado oficial
+        validarCurso,                  // V-07 — curso en catálogo oficial
+        validarProgreso,               // V-08 — progreso 0–100
+        validarFechaInscripcion,       // V-09 — fecha ISO válida y en rango
+        validarPlan,                   // V-10 — plan reconocido
+        validarMontoPositivo,          // V-19 — monto > 0 (antes de V-11)
+        validarCoherenciaMontoConPlan, // V-11 — plan y montoUSD coherente
+        validarActivoDefinido,         // V-20 — activo no es undefined
+        validarActivoEstricto,         // V-12 — activo es boolean estricto
+        validarCoherenciaProgresoActivo// V-13 — progreso y activo coherente
+    ];
+
+    /**
+     * Valida UN registro con las reglas por registro (V-01 a V-13, V-19 y V-20).
+     * No evalúa las reglas que comparan varios registros (V-14 a V-18).
+     *
+     * @param   {*}      unRegistro  Registro a validar
+     * @param   {object} [opciones]  { hoy: 'AAAA-MM-DD' } para fijar la fecha de hoy
+     * @returns {{valido: boolean, errores: Array}}
+     */
+    function registro(unRegistro, opciones) {
+        contexto.hoy = (opciones && opciones.hoy) || fechaLocalISO(new Date());
+
+        if (!esObjeto(unRegistro)) {
+            return {
+                valido: false,
+                errores: [crearError(
+                    'ERROR', null, 'registro', 'V-01',
+                    'El registro no es un objeto',
+                    unRegistro === null ? 'null' : typeof unRegistro
+                )]
+            };
+        }
+
+        var errores = [];
+        VALIDADORES_POR_REGISTRO.forEach(function (validador) {
+            errores = errores.concat(validador(unRegistro));
+        });
+        return {
+            valido: !errores.some(function (err) { return err.nivel === 'ERROR'; }),
+            errores: errores
+        };
+    }
+
+
     /**
      * Valida el dataset completo de estudiantes StudentScope MJ antes
      * de que los datos lleguen a cualquier componente de la interfaz.
@@ -844,7 +904,8 @@
      * reporte           {string}  resumen visual para console.log
      * }
      */
-    function dataset(estudiantes) {
+    function dataset(estudiantes, opciones) {
+        contexto.hoy = (opciones && opciones.hoy) || fechaLocalISO(new Date());
 
         /* ── Guardia 1: el argumento debe ser un array ────────────── */
         if (!Array.isArray(estudiantes)) {
@@ -886,9 +947,21 @@
         }
 
 
+        /* ── Separar lo que no es un objeto: no se puede validar ──── */
+        var registros = estudiantes.filter(esObjeto);
+        var descartados = estudiantes.filter(function (valor) { return !esObjeto(valor); });
+
         /* ── Acumuladores de resultados ───────────────────────────── */
         var todosLosErrores = [];
         var idsConError = {};   // { id: true } → registro tiene al menos un ERROR
+
+        descartados.forEach(function (valor) {
+            todosLosErrores.push(crearError(
+                'ERROR', null, 'registro', 'V-01',
+                'El registro no es un objeto',
+                valor === null ? 'null' : typeof valor
+            ));
+        });
 
 
         /* ══════════════════════════════════════════════════════════
@@ -896,25 +969,9 @@
            Orden de ejecución diseñado para dar mensajes claros:
            estructura → tipos → reglas de negocio → coherencia
            ══════════════════════════════════════════════════════════ */
-        var validadoresPorRegistro = [
-            validarCamposRequeridos,       // V-01 — campos presentes
-            validarTipos,                  // V-02 — tipos de dato
-            validarId,                     // V-03 — ID entero positivo
-            validarEmail,                  // V-04 — formato email
-            validarNombres,                // V-05 — nombre y apellido no vacíos
-            validarCiudad,                 // V-06 — ciudad en listado oficial
-            validarCurso,                  // V-07 — curso en catálogo oficial
-            validarProgreso,               // V-08 — progreso 0–100
-            validarFechaInscripcion,       // V-09 — fecha ISO válida y en rango
-            validarPlan,                   // V-10 — plan reconocido
-            validarMontoPositivo,          // V-19 — monto > 0 (antes de V-11)
-            validarCoherenciaMontoConPlan, // V-11 — plan ↔ montoUSD coherente
-            validarActivoDefinido,         // V-20 — activo no es undefined
-            validarActivoEstricto,         // V-12 — activo es boolean estricto
-            validarCoherenciaProgresoActivo// V-13 — progreso ↔ activo coherente
-        ];
+        var validadoresPorRegistro = VALIDADORES_POR_REGISTRO;
 
-        estudiantes.forEach(function (registro) {
+        registros.forEach(function (registro) {
             validadoresPorRegistro.forEach(function (validador) {
                 var resultado = validador(registro);
                 resultado.forEach(function (err) {
@@ -939,7 +996,7 @@
         ];
 
         validadoresDataset.forEach(function (validador) {
-            var resultado = validador(estudiantes);
+            var resultado = validador(registros);
             resultado.forEach(function (err) {
                 todosLosErrores.push(err);
                 if (err.nivel === 'ERROR' && err.id !== null && err.id !== undefined) {
@@ -960,8 +1017,8 @@
 
 
         /* ── Separar registros válidos e inválidos ────────────────── */
-        var registrosValidos = estudiantes.filter(function (r) { return !idsConError[r.id]; });
-        var registrosInvalidos = estudiantes.filter(function (r) { return idsConError[r.id]; });
+        var registrosValidos = registros.filter(function (r) { return !idsConError[r.id]; });
+        var registrosInvalidos = registros.filter(function (r) { return idsConError[r.id]; }).concat(descartados);
         var esValido = conteoNiveles['ERROR'] === 0;
         var idsInvalidosLista = Object.keys(idsConError).sort(function (a, b) {
             return Number(a) - Number(b);
@@ -1009,7 +1066,7 @@
                     'V-10': 'Plan no reconocido',
                     'V-11': 'Monto incoherente con el plan',
                     'V-12': 'Campo activo no es boolean estricto',
-                    'V-13': 'Incoherencia progreso ↔ activo',
+                    'V-13': 'Incoherencia progreso y activo',
                     'V-14': 'ID duplicado en el dataset',
                     'V-15': 'Email duplicado en el dataset',
                     'V-16': 'Salto en la secuencia de IDs',
@@ -1070,6 +1127,13 @@
         var api = {
             /** Función principal de validación */
             dataset: dataset,
+
+            /** Validación de un solo registro (reglas por registro) */
+            registro: registro,
+
+            /** Primera fecha de inscripción permitida y fecha de hoy (hora local) */
+            FECHA_MINIMA: FECHA_MIN,
+            hoy: function () { return fechaLocalISO(new Date()); },
 
             /** Constantes de negocio exportadas para consulta externa */
             PLANES: PLANES,

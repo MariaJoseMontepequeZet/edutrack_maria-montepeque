@@ -49,7 +49,8 @@ Hecho por María José Montepeque Zet.
 | `css/Estudiantes.css` | Estilos de la gestión de estudiantes: tarjetas, filtros, paginación y modales. |
 | `js/App.js` | Lógica principal: enrutador, CRUD, gráficas, cursos, reportes, configuración y notificaciones. |
 | `js/Sidebar.js` | Control del menú lateral: eventos, accesibilidad y cambio de tamaño. |
-| `js/Validacion.js` | Motor de validación del dataset con 20 reglas de negocio. |
+| `js/Catalogo.js` | Catálogo oficial de 30 cursos: única fuente para la interfaz y el validador. |
+| `js/Validacion.js` | Motor de validación con 20 reglas de negocio, para un dataset completo o para un registro. |
 | `js/Escapar.js` | Utilidades de seguridad: escape de HTML y conversión segura a número. |
 | `js/Iconos.js` | Iconos SVG propios y función que los inserta en los elementos con `data-icono`. |
 | `js/Api.js` | Cliente de la API: envía las cookies de sesión, traduce errores y avisa cuando la sesión expira. |
@@ -151,6 +152,9 @@ Uso en el navegador:
 const resultado = EduTrack.validar.dataset(estudiantes);
 console.log(resultado.reporte);
 const registrosSeguros = resultado.registrosValidos;
+
+const unico = EduTrack.validar.registro(nuevoEstudiante);
+if (!unico.valido) console.log(unico.errores);
 ```
 
 Uso en Node.js:
@@ -159,7 +163,17 @@ Uso en Node.js:
 node js/Validacion.js
 ```
 
-Estado actual: el validador funciona de forma independiente, pero la interfaz todavía no lo invoca. Su integración con el formulario y la carga de datos está en el plan de trabajo.
+Reglas relevantes:
+
+* **Cursos (V-07):** deben existir en `js/Catalogo.js`. Agregar un curso al catálogo lo habilita en el formulario y en el validador a la vez.
+* **Fecha de inscripción (V-09):** desde el 2023-01-01 hasta el día de hoy, con la fecha local del equipo. No se aceptan fechas inexistentes como `2023-02-30`.
+* **`dataset()`** acepta un segundo argumento `{ hoy: 'AAAA-MM-DD' }` para fijar el día de hoy en las pruebas. Si el arreglo contiene valores que no son objetos (`null`, números, textos), los marca como inválidos en lugar de fallar.
+* **`registro()`** valida un solo registro con las reglas V-01 a V-13, V-19 y V-20, sin las que comparan varios registros (V-14 a V-18).
+
+Dónde se usa en la aplicación:
+
+* **Al cargar los datos guardados:** se validan antes de mostrarlos. Los registros con errores no se muestran ni se borran: se guardan aparte en la clave `edutrack_estudiantes_invalidos` de `localStorage` (hasta 200) y un aviso indica cuántos se apartaron. Si no queda ninguno válido, se cargan los 35 estudiantes de ejemplo.
+* **Al guardar desde el formulario:** el registro completo pasa por `registro()`. Los errores se muestran junto al campo correspondiente y las advertencias no bloquean el guardado. El campo de fecha ya limita el rango permitido.
 
 ---
 
@@ -213,3 +227,12 @@ La configuración del servidor (Docker Compose, Caddy y secretos) vive fuera del
 * Los diálogos de confirmación aceptan una etiqueta propia; el de restablecer datos ya no dice "Sí, eliminar".
 * Se agrega `npm run dev`, un servidor local que sirve el frontend y reenvía `/api` al backend.
 * Se agregan pruebas del cliente de API (77 pruebas en total).
+
+### Día 4 - Reglas del validador alineadas con los datos
+* El catálogo de 30 cursos pasa a `js/Catalogo.js` y es la única fuente: el selector del formulario y el validador salen de ahí. Antes el validador solo conocía 8.
+* La fecha máxima de inscripción deja de estar fija en 2025 y pasa a ser el día de hoy. Un estudiante registrado hoy ya no se marca como inválido.
+* El formulario proponía la fecha de hoy con la hora UTC, que podía ser el día siguiente; ahora usa la fecha local.
+* Nueva función `EduTrack.validar.registro()` y soporte para valores que no son objetos dentro del dataset.
+* El validador se conecta a la aplicación: se aplica al cargar `localStorage` (con cuarentena de lo inválido) y al guardar desde el formulario.
+* La portada anunciaba 8 cursos oficiales; ahora indica 30.
+* 92 pruebas en total.
