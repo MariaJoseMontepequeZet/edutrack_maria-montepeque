@@ -13,7 +13,8 @@ Hecho por María José Montepeque Zet.
 
 ## Características principales
 
-* **SPA con enrutador ligero:** navegación entre Landing, Login y Dashboard sin recargar la página.
+* **SPA con enrutador ligero:** navegación entre Landing, Login, Registro y Dashboard sin recargar la página.
+* **Cuentas y roles:** registro de usuarios, inicio de sesión real contra la API y panel de administración de cuentas (editar, eliminar, hacer o quitar administrador).
 * **Dashboard analítico:** indicadores clave y gráficas con Chart.js.
 * **Gestión de estudiantes (CRUD):**
   * Vista en tarjetas.
@@ -51,6 +52,10 @@ Hecho por María José Montepeque Zet.
 | `js/Validacion.js` | Motor de validación del dataset con 20 reglas de negocio. |
 | `js/Escapar.js` | Utilidades de seguridad: escape de HTML y conversión segura a número. |
 | `js/Iconos.js` | Iconos SVG propios y función que los inserta en los elementos con `data-icono`. |
+| `js/Api.js` | Cliente de la API: envía las cookies de sesión, traduce errores y avisa cuando la sesión expira. |
+| `js/Cuentas.js` | Sección Cuentas del administrador: lista, búsqueda, edición, cambio de rol y eliminación. |
+| `css/Cuentas.css` | Estilos de la gestión de cuentas. |
+| `scripts/servir.mjs` | Servidor local de desarrollo: sirve el frontend y reenvía `/api` al backend. |
 | `json/Datos.json` | Copia del dataset inicial de 35 estudiantes, igual al de `App.js`. |
 | `test/` | Pruebas automáticas con Vitest: las 20 reglas del validador y las utilidades de escape. |
 | `package.json` | Scripts y herramientas de desarrollo (solo para pruebas y calidad de código; la aplicación no las usa). |
@@ -62,14 +67,38 @@ Hecho por María José Montepeque Zet.
 
 ## Instalación y uso
 
-No requiere compilación ni dependencias.
+El frontend necesita el backend (`studentscope-mj-backend`) para iniciar sesión, porque las cuentas viven en su base de datos.
 
-1. Clona el repositorio o descarga los archivos.
-2. Abre `index.html` en un navegador moderno, o sírvelo con una extensión como Live Server de VS Code.
+1. Clona los dos repositorios y levanta el backend siguiendo su README (PostgreSQL, variables de entorno y `npm start`).
+2. En este repositorio:
+
+```bash
+npm install
+npm run dev
+```
+
+3. Abre `http://localhost:5173`.
+
+`npm run dev` sirve los archivos del frontend y reenvía las peticiones `/api` al backend en `http://127.0.0.1:3100`. Se pueden cambiar con las variables `PORT` y `API_URL`.
+
+Con la cookie de sesión no se puede abrir `index.html` directamente ni servirlo con una extensión que no reenvíe `/api`: el navegador no podría llegar a la API.
 
 Los nombres de archivos y carpetas distinguen mayúsculas y minúsculas en servidores Linux (por ejemplo, `css/Style.css`).
 
-La primera vez que se carga, la aplicación guarda un dataset de prueba en el `localStorage` del navegador. Se puede restablecer desde la sección Configuración del Dashboard.
+Los estudiantes, cursos y reportes todavía usan datos de ejemplo guardados en el `localStorage` del navegador. Se pueden restablecer desde la sección Configuración del Dashboard, que ve el administrador.
+
+---
+
+## Cuentas y roles
+
+* **Registro:** cualquiera crea una cuenta desde la pantalla de registro. Las cuentas nuevas son siempre `usuario`.
+* **Usuario:** ve el Dashboard, el catálogo de Cursos y su propio perfil (cambiar nombre y contraseña). No ve estudiantes, reportes, notificaciones ni cuentas.
+* **Administrador:** además gestiona estudiantes, reportes y la sección **Cuentas**, donde puede editar nombre, correo y contraseña de cualquiera, hacer o quitar el rol de administrador y eliminar cuentas.
+* Siempre queda al menos un administrador, y nadie puede eliminar su propia cuenta desde esa sección.
+* El primer administrador lo crea el backend al iniciar, a partir de `ADMIN_EMAIL` y `ADMIN_PASSWORD`.
+* La sesión vive en una cookie `HttpOnly` que el navegador no deja leer desde JavaScript. Si la cuenta se elimina o la sesión caduca, la aplicación vuelve al inicio de sesión.
+
+Aviso: los datos de los estudiantes todavía están en el navegador, así que el control de acceso a esa parte es solo visual. Los permisos de las cuentas sí los aplica el servidor. Cuando los estudiantes pasen a la API, los permisos cubrirán también esos datos.
 
 ---
 
@@ -102,6 +131,7 @@ Cada archivo usa una IIFE para no contaminar el objeto global. Solo se expone lo
 * **Estado centralizado:** `App.js` mantiene un objeto `state` con la vista actual, los estudiantes, los filtros y las instancias de las gráficas.
 * **Renderizado:** los componentes se vuelven a pintar con plantillas de texto cuando cambia el estado.
 * **Seguridad:** todo dato de estudiante que se inserta en una plantilla pasa por `escaparHTML()` (o `aNumero()` si es numérico), y los mensajes emergentes se crean con nodos de texto. Así un nombre como `<img src=x onerror=...>` se muestra como texto y no se ejecuta.
+* **Sesión y roles:** `App.js` guarda el usuario actual en `state.usuario`. Los elementos marcados con `data-solo-admin` se ocultan para quien no es administrador y las secciones de administración vuelven al Dashboard si se intentan abrir sin permiso.
 * **Iconos:** la interfaz no usa emojis. Los iconos son SVG definidos en `Iconos.js`; el HTML los pide con `data-icono="nombre"` y las plantillas de JavaScript con `EduTrack.icono('nombre')`.
 * **Eventos:** no hay manejadores en línea (`onclick`). Los botones declaran `data-action` (y `data-id` o `data-page` cuando hace falta) y un único oyente de clic en `App.js` ejecuta la acción correspondiente. Esto permite una política de seguridad de contenido sin `unsafe-inline` en los scripts.
 
@@ -174,3 +204,12 @@ La configuración del servidor (Docker Compose, Caddy y secretos) vive fuera del
 * Se escriben 68 pruebas: las reglas V-01 a V-20 del validador, los casos límite y las utilidades de escape.
 * Se corrige el validador: aceptaba fechas imposibles como `2023-02-30`, porque JavaScript las convierte a una fecha del mes siguiente. Ahora se rechazan.
 * Se corrigen cuatro avisos de lint: una variable sin usar en `App.js`, un parámetro sin usar y dos escapes innecesarios en la expresión regular del correo.
+
+### Cuentas de usuario
+* Registro e inicio de sesión reales contra la API, con restauración de la sesión al recargar y cierre de sesión.
+* Roles `usuario` y `administrador`: el usuario ve un panel de solo lectura y su perfil; el administrador conserva todo y gana la sección Cuentas.
+* Sección Cuentas: lista, búsqueda, edición, restablecer contraseña, hacer o quitar administrador y eliminar, con confirmación y protección de la propia cuenta.
+* Perfil propio: cambio de nombre y de contraseña contra la API.
+* Los diálogos de confirmación aceptan una etiqueta propia; el de restablecer datos ya no dice "Sí, eliminar".
+* Se agrega `npm run dev`, un servidor local que sirve el frontend y reenvía `/api` al backend.
+* Se agregan pruebas del cliente de API (77 pruebas en total).
