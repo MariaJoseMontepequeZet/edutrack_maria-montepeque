@@ -98,7 +98,8 @@
         vistaActual: 'landing',
         paginaActual: 1,
         itemsPorPagina: 12,
-        filtroCategoria: 'todos'
+        filtroCategoria: 'todos',
+        usuario: null
     };
 
     /* ════════════════════════════════════════════
@@ -123,6 +124,9 @@
 
             if (nombre === 'dashboard') {
                 actualizarUsuarioDashboard(datos || {});
+                reiniciarVistasDinamicas();
+                aplicarRol();
+                activarSeccion('dashboard');
                 actualizarFechaTopbar();
                 cargarDatos();
                 poblarSelectCiudades();
@@ -137,15 +141,37 @@
     }
 
     function actualizarUsuarioDashboard(d) {
-        var nombre = (d && d.nombre) ? d.nombre : 'Estudiante';
-        var apellido = (d && d.apellido) ? d.apellido : '';
-        var nombreCompleto = (nombre + ' ' + apellido).trim();
+        var nombreCompleto = (d && d.nombre) ? d.nombre.trim() : 'Usuario';
+        var primerNombre = nombreCompleto.split(' ')[0] || nombreCompleto;
         var set = function (id, val) { var el = document.getElementById(id); if (el) el.textContent = val; };
-        set('greetingNombre', nombre);
+        set('greetingNombre', primerNombre);
         set('sidebarNombre', nombreCompleto);
-        set('sidebarRol', 'Administrador');
+        set('sidebarRol', d && d.rol === 'administrador' ? 'Administrador' : 'Usuario');
         var av = document.getElementById('sidebarAvatar');
-        if (av) av.textContent = nombre[0].toUpperCase();
+        if (av) av.textContent = nombreCompleto.charAt(0).toUpperCase();
+    }
+
+    function esAdministrador() {
+        return !!(state.usuario && state.usuario.rol === 'administrador');
+    }
+
+    function aplicarRol() {
+        var admin = esAdministrador();
+        document.querySelectorAll('[data-solo-admin]').forEach(function (el) { el.hidden = !admin; });
+        var textoConfig = document.querySelector('.db-sidebar__nav-link[data-section="configuracion"] .db-sidebar__nav-text');
+        if (textoConfig) textoConfig.textContent = admin ? 'Configuración' : 'Mi perfil';
+        if (!admin) cerrarPanelNotificaciones();
+    }
+
+    function reiniciarVistasDinamicas() {
+        ['secReportes', 'secConfiguracion', 'secCuentas'].forEach(function (id) {
+            var sec = document.getElementById(id);
+            if (!sec) return;
+            sec._rendered = false;
+            sec.innerHTML = '';
+        });
+        if (state.graficoPlan) { state.graficoPlan.destroy(); state.graficoPlan = null; }
+        if (state.graficoProgreso) { state.graficoProgreso.destroy(); state.graficoProgreso = null; }
     }
 
     function actualizarFechaTopbar() {
@@ -160,42 +186,49 @@
     /* ════════════════════════════════════════════
        NAVEGACIÓN DEL SIDEBAR
     ════════════════════════════════════════════ */
-    function initNavSidebar() {
-        var SECCIONES = {
-            'dashboard': 'secDashboard',
-            'estudiantes': 'secEstudiantes',
-            'cursos': 'secCursos',
-            'reportes': 'secReportes',
-            'configuracion': 'secConfiguracion'
-        };
+    var SECCIONES = {
+        'dashboard': 'secDashboard',
+        'estudiantes': 'secEstudiantes',
+        'cursos': 'secCursos',
+        'reportes': 'secReportes',
+        'cuentas': 'secCuentas',
+        'configuracion': 'secConfiguracion'
+    };
+    var SECCIONES_ADMIN = ['estudiantes', 'reportes', 'cuentas'];
 
+    function activarSeccion(seccion) {
+        if (!SECCIONES[seccion]) return;
+        if (SECCIONES_ADMIN.indexOf(seccion) !== -1 && !esAdministrador()) seccion = 'dashboard';
+
+        document.querySelectorAll('.db-sidebar__nav-link').forEach(function (l) {
+            l.classList.toggle('db-sidebar__nav-link--active', l.getAttribute('data-section') === seccion);
+        });
+
+        Object.keys(SECCIONES).forEach(function (k) {
+            var sec = document.getElementById(SECCIONES[k]);
+            if (!sec) return;
+            if (k === seccion) {
+                sec.classList.remove('db-section--hidden');
+                sec.style.display = 'block';
+            } else {
+                sec.classList.add('db-section--hidden');
+                sec.style.display = 'none';
+            }
+        });
+
+        if (seccion === 'cursos') renderizarCursos();
+        if (seccion === 'reportes') renderizarReportes();
+        if (seccion === 'cuentas') window.EduTrack.cuentas.mostrar();
+        if (seccion === 'configuracion') renderizarConfiguracion();
+    }
+
+    function initNavSidebar() {
         document.querySelectorAll('.db-sidebar__nav-link').forEach(function (link) {
             link.addEventListener('click', function (e) {
                 e.preventDefault();
                 var seccion = this.getAttribute('data-section');
                 if (!seccion) return;
-
-                document.querySelectorAll('.db-sidebar__nav-link').forEach(function (l) {
-                    l.classList.remove('db-sidebar__nav-link--active');
-                });
-                this.classList.add('db-sidebar__nav-link--active');
-
-                Object.keys(SECCIONES).forEach(function (k) {
-                    var sec = document.getElementById(SECCIONES[k]);
-                    if (!sec) return;
-                    if (k === seccion) {
-                        sec.classList.remove('db-section--hidden');
-                        sec.style.display = 'block';
-                    } else {
-                        sec.classList.add('db-section--hidden');
-                        sec.style.display = 'none';
-                    }
-                });
-
-                /* Renderizar la sección al activarse */
-                if (seccion === 'cursos') renderizarCursos();
-                if (seccion === 'reportes') renderizarReportes();
-                if (seccion === 'configuracion') renderizarConfiguracion();
+                activarSeccion(seccion);
 
                 if (window.innerWidth < 768) {
                     window.EduTrack && window.EduTrack.closeSidebar && window.EduTrack.closeSidebar();
@@ -360,6 +393,7 @@
        MODAL ESTUDIANTE
     ════════════════════════════════════════════ */
     function abrirModal(id) {
+        if (!esAdministrador()) return;
         state.editandoId = id || null;
         limpiarFormulario();
         if (id) {
@@ -402,6 +436,7 @@
     }
 
     function guardarEstudiante() {
+        if (!esAdministrador()) return;
         var g = function (id) { return document.getElementById(id); };
         var d = {
             nombre: g('fNombre').value.trim(),
@@ -474,6 +509,7 @@
     }
 
     function eliminarEstudiante(id) {
+        if (!esAdministrador()) return;
         var e = state.estudiantes.find(function (x) { return x.id === id; }); if (!e) return;
         abrirConfirm(
             '¿Eliminar estudiante?',
@@ -486,9 +522,10 @@
         );
     }
 
-    function abrirConfirm(t, m, cb) {
+    function abrirConfirm(t, m, cb, etiqueta) {
         document.getElementById('confirmTitulo').textContent = t;
         document.getElementById('confirmMsg').innerHTML = m;
+        document.getElementById('confirmAceptar').textContent = etiqueta || 'Sí, eliminar';
         state.confirmCb = cb;
         document.getElementById('confirmOverlay').classList.add('is-open');
     }
@@ -798,41 +835,51 @@
         var sec = document.getElementById('secConfiguracion');
         if (!sec || sec._rendered) return;
 
+        var admin = esAdministrador();
+        var u = state.usuario || {};
+
         sec.innerHTML =
             '<header class="page-header">' +
-            '<div><h2 class="page-header__title">Configuración <span>del Sistema</span></h2>' +
-            '<p class="page-header__meta">Ajustes generales · StudentScope MJ v2.3</p></div>' +
+            '<div><h2 class="page-header__title">' +
+            (admin ? 'Configuración <span>del Sistema</span>' : 'Mi <span>perfil</span>') + '</h2>' +
+            '<p class="page-header__meta">' +
+            (admin ? 'Ajustes generales · StudentScope MJ v2.3' : 'Tus datos y tu contraseña') + '</p></div>' +
             '</header>' +
 
             '<div class="config-grid">' +
 
             /* Tarjeta: Perfil */
             '<section class="config-card" aria-labelledby="cfg-perfil">' +
-            '<h3 class="config-card__title" id="cfg-perfil">Perfil del administrador</h3>' +
+            '<h3 class="config-card__title" id="cfg-perfil">Mi cuenta</h3>' +
             '<div class="config-form">' +
-            '<div class="form-group"><label class="config-label">Nombre completo</label>' +
-            '<input type="text" class="form-input config-input" id="cfgNombre" value="Administrador StudentScope MJ" /></div>' +
-            '<div class="form-group"><label class="config-label">Correo electrónico</label>' +
-            '<input type="email" class="form-input config-input" id="cfgEmail" value="admin@edutrack.co" /></div>' +
-            '<div class="form-group"><label class="config-label">Cargo</label>' +
-            '<input type="text" class="form-input config-input" id="cfgCargo" value="Administrador General" /></div>' +
-            '<button class="btn btn-primary" data-action="guardar-perfil">Guardar perfil</button>' +
+            '<div class="form-group"><label class="config-label" for="cfgNombre">Nombre completo</label>' +
+            '<input type="text" class="form-input config-input" id="cfgNombre" maxlength="100" value="' + esc(u.nombre) + '" />' +
+            '<span class="form-group__error" aria-live="polite"></span></div>' +
+            '<div class="form-group"><label class="config-label" for="cfgEmail">Correo electrónico</label>' +
+            '<input type="email" class="form-input config-input" id="cfgEmail" value="' + esc(u.email) + '" readonly /></div>' +
+            '<div class="form-group"><label class="config-label" for="cfgRol">Rol</label>' +
+            '<input type="text" class="form-input config-input" id="cfgRol" value="' + (admin ? 'Administrador' : 'Usuario') + '" readonly /></div>' +
+            '<button class="btn btn-primary" id="btnGuardarPerfil" data-action="guardar-perfil">Guardar perfil</button>' +
             '</div></section>' +
 
             /* Tarjeta: Seguridad */
             '<section class="config-card" aria-labelledby="cfg-seg">' +
             '<h3 class="config-card__title" id="cfg-seg">Seguridad</h3>' +
             '<div class="config-form">' +
-            '<div class="form-group"><label class="config-label">Contraseña actual</label>' +
-            '<input type="password" class="form-input config-input" id="cfgPassActual" placeholder="••••••••" /></div>' +
-            '<div class="form-group"><label class="config-label">Nueva contraseña</label>' +
-            '<input type="password" class="form-input config-input" id="cfgPassNueva" placeholder="••••••••" /></div>' +
-            '<div class="form-group"><label class="config-label">Confirmar contraseña</label>' +
-            '<input type="password" class="form-input config-input" id="cfgPassConfirm" placeholder="••••••••" /></div>' +
-            '<button class="btn btn-primary" data-action="cambiar-password">Cambiar contraseña</button>' +
+            '<div class="form-group"><label class="config-label" for="cfgPassActual">Contraseña actual</label>' +
+            '<input type="password" class="form-input config-input" id="cfgPassActual" autocomplete="current-password" />' +
+            '<span class="form-group__error" aria-live="polite"></span></div>' +
+            '<div class="form-group"><label class="config-label" for="cfgPassNueva">Nueva contraseña</label>' +
+            '<input type="password" class="form-input config-input" id="cfgPassNueva" autocomplete="new-password" />' +
+            '<span class="form-group__error" aria-live="polite"></span></div>' +
+            '<div class="form-group"><label class="config-label" for="cfgPassConfirm">Confirmar contraseña</label>' +
+            '<input type="password" class="form-input config-input" id="cfgPassConfirm" autocomplete="new-password" />' +
+            '<span class="form-group__error" aria-live="polite"></span></div>' +
+            '<button class="btn btn-primary" id="btnCambiarPassword" data-action="cambiar-password">Cambiar contraseña</button>' +
             '</div></section>' +
 
-            /* Tarjeta: Notificaciones */
+            (admin ? (
+            /* Tarjetas solo para administradores: Notificaciones y Sistema */
             '<section class="config-card" aria-labelledby="cfg-notif">' +
             '<h3 class="config-card__title" id="cfg-notif">Notificaciones</h3>' +
             '<div class="config-toggles">' +
@@ -866,7 +913,7 @@
             '</div>' +
             '</div>' +
             '<p class="config-version">StudentScope MJ v2.3 · Vanilla JS · CSS Puro · Sin frameworks</p>' +
-            '</section>' +
+            '</section>') : '') +
 
             '</div>';
 
@@ -883,27 +930,52 @@
     }
 
     /* Acciones de configuración */
-    function guardarPerfil() {
-        var nombre = (document.getElementById('cfgNombre') || {}).value || '';
-        if (nombre.trim()) {
-            var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
-            set('sidebarNombre', nombre.trim());
-            set('greetingNombre', nombre.trim().split(' ')[0]);
+    async function guardarPerfil() {
+        var campo = document.getElementById('cfgNombre');
+        var boton = document.getElementById('btnGuardarPerfil');
+        var nombre = campo ? campo.value.trim() : '';
+
+        setFieldError('cfgNombre', nombre ? '' : 'El nombre es obligatorio');
+        if (!nombre) return;
+
+        if (boton) boton.disabled = true;
+        try {
+            var r = await window.EduTrack.api.patch('/api/auth/yo', { nombre: nombre });
+            actualizarUsuarioActual(r.usuario);
+            showToast('Perfil guardado correctamente', 'success');
+        } catch (error) {
+            setFieldError('cfgNombre', (error.campos && error.campos.nombre) || error.message);
+        } finally {
+            if (boton) boton.disabled = false;
         }
-        showToast('Perfil guardado correctamente', 'success');
     }
 
-    function cambiarPassword() {
-        var actual = (document.getElementById('cfgPassActual') || {}).value || '';
-        var nueva = (document.getElementById('cfgPassNueva') || {}).value || '';
-        var confirm = (document.getElementById('cfgPassConfirm') || {}).value || '';
-        if (!actual.trim()) { showToast('Ingresa tu contraseña actual', 'error'); return; }
-        if (nueva.length < 6) { showToast('La nueva contraseña debe tener al menos 6 caracteres', 'error'); return; }
-        if (nueva !== confirm) { showToast('Las contraseñas no coinciden', 'error'); return; }
-        ['cfgPassActual', 'cfgPassNueva', 'cfgPassConfirm'].forEach(function (id) {
-            var el = document.getElementById(id); if (el) el.value = '';
-        });
-        showToast('Contraseña actualizada correctamente', 'success');
+    async function cambiarPassword() {
+        var valor = function (id) { return (document.getElementById(id) || {}).value || ''; };
+        var actual = valor('cfgPassActual');
+        var nueva = valor('cfgPassNueva');
+        var confirmacion = valor('cfgPassConfirm');
+        var boton = document.getElementById('btnCambiarPassword');
+
+        setFieldError('cfgPassActual', actual ? '' : 'Ingresa tu contraseña actual');
+        setFieldError('cfgPassNueva', nueva ? '' : 'Ingresa la nueva contraseña');
+        setFieldError('cfgPassConfirm', nueva === confirmacion ? '' : 'Las contraseñas no coinciden');
+        if (!actual || !nueva || nueva !== confirmacion) return;
+
+        if (boton) boton.disabled = true;
+        try {
+            await window.EduTrack.api.patch('/api/auth/yo', { passwordActual: actual, passwordNueva: nueva });
+            ['cfgPassActual', 'cfgPassNueva', 'cfgPassConfirm'].forEach(function (id) {
+                var el = document.getElementById(id); if (el) el.value = '';
+            });
+            showToast('Contraseña actualizada correctamente', 'success');
+        } catch (error) {
+            var campos = error.campos || {};
+            setFieldError('cfgPassActual', campos.passwordActual || '');
+            setFieldError('cfgPassNueva', campos.passwordNueva || (campos.passwordActual ? '' : error.message));
+        } finally {
+            if (boton) boton.disabled = false;
+        }
     }
 
     function guardarNotificaciones() {
@@ -954,7 +1026,8 @@
                 state.graficoPlan = null;
                 state.graficoProgreso = null;
                 showToast('Datos restablecidos a los 35 originales', 'info');
-            }
+            },
+            'Sí, restablecer'
         );
     }
 
@@ -1084,7 +1157,7 @@
 
     function abrirPanelNotificaciones() {
         var panel = document.getElementById('notifPanel');
-        if (!panel) return;
+        if (!panel || !esAdministrador()) return;
 
         var notifs = generarNotificaciones();
         var colores = {
@@ -1133,6 +1206,160 @@
     }
 
     /* ════════════════════════════════════════════
+       SESIÓN Y CUENTAS
+    ════════════════════════════════════════════ */
+    function mostrarErrorCampo(idError, mensaje) {
+        var el = document.getElementById(idError);
+        if (!el) return;
+        el.textContent = mensaje || '';
+        el.classList.toggle('visible', !!mensaje);
+    }
+
+    function limpiarErrores(ids) {
+        ids.forEach(function (id) { mostrarErrorCampo(id, ''); });
+    }
+
+    function mostrarErroresServidor(error, mapa, idGeneral) {
+        var usado = false;
+        Object.keys(error.campos || {}).forEach(function (campo) {
+            if (mapa[campo]) {
+                mostrarErrorCampo(mapa[campo], error.campos[campo]);
+                usado = true;
+            }
+        });
+        if (!usado) mostrarErrorCampo(idGeneral, error.message);
+    }
+
+    function ocupado(boton, estaOcupado, texto) {
+        if (!boton) return;
+        if (estaOcupado) {
+            boton.dataset.texto = boton.textContent;
+            boton.textContent = texto;
+        } else if (boton.dataset.texto) {
+            boton.textContent = boton.dataset.texto;
+        }
+        boton.disabled = estaOcupado;
+    }
+
+    function entrar(usuario) {
+        state.usuario = usuario;
+        mostrarVista('dashboard', usuario);
+    }
+
+    function actualizarUsuarioActual(usuario) {
+        state.usuario = usuario;
+        actualizarUsuarioDashboard(usuario);
+        var campoNombre = document.getElementById('cfgNombre');
+        if (campoNombre) campoNombre.value = usuario.nombre;
+    }
+
+    function limpiarSesionLocal() {
+        state.usuario = null;
+        cerrarPanelNotificaciones();
+        window.EduTrack.cuentas.reiniciar();
+    }
+
+    async function iniciarSesion(e) {
+        e.preventDefault();
+        var email = document.getElementById('loginEmail').value.trim();
+        var password = document.getElementById('loginPassword').value;
+        var boton = document.getElementById('btnLogin');
+
+        limpiarErrores(['loginEmailError', 'loginPasswordError']);
+        if (!email) mostrarErrorCampo('loginEmailError', 'Ingresa tu correo');
+        if (!password) mostrarErrorCampo('loginPasswordError', 'Ingresa tu contraseña');
+        if (!email || !password) return;
+
+        ocupado(boton, true, 'Ingresando…');
+        try {
+            var r = await window.EduTrack.api.post('/api/auth/login', { email: email, password: password });
+            document.getElementById('loginPassword').value = '';
+            entrar(r.usuario);
+        } catch (error) {
+            mostrarErroresServidor(error, { email: 'loginEmailError', password: 'loginPasswordError' }, 'loginPasswordError');
+        } finally {
+            ocupado(boton, false);
+        }
+    }
+
+    function errorPasswordLocal(password) {
+        if (password.length < 8) return 'La contraseña debe tener al menos 8 caracteres';
+        if (password.length > 72) return 'La contraseña no puede superar 72 caracteres';
+        if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) return 'La contraseña debe incluir letras y números';
+        return '';
+    }
+
+    async function registrarCuenta(e) {
+        e.preventDefault();
+        var valor = function (id) { return document.getElementById(id).value; };
+        var nombre = valor('regNombre').trim();
+        var email = valor('regEmail').trim();
+        var password = valor('regPassword');
+        var repetida = valor('regPassword2');
+        var boton = document.getElementById('btnRegistro');
+
+        limpiarErrores(['regNombreError', 'regEmailError', 'regPasswordError', 'regPassword2Error']);
+        var errores = {
+            regNombreError: nombre ? '' : 'Ingresa tu nombre',
+            regEmailError: email ? '' : 'Ingresa tu correo',
+            regPasswordError: errorPasswordLocal(password),
+            regPassword2Error: password === repetida ? '' : 'Las contraseñas no coinciden'
+        };
+        var hayErrores = false;
+        Object.keys(errores).forEach(function (id) {
+            mostrarErrorCampo(id, errores[id]);
+            if (errores[id]) hayErrores = true;
+        });
+        if (hayErrores) return;
+
+        ocupado(boton, true, 'Creando cuenta…');
+        try {
+            var r = await window.EduTrack.api.post('/api/auth/registro', { nombre: nombre, email: email, password: password });
+            ['regNombre', 'regEmail', 'regPassword', 'regPassword2'].forEach(function (id) {
+                document.getElementById(id).value = '';
+            });
+            entrar(r.usuario);
+            showToast('Cuenta creada. Te damos la bienvenida', 'success');
+        } catch (error) {
+            if (error.codigo === 'EMAIL_DUPLICADO') {
+                mostrarErrorCampo('regEmailError', error.message);
+            } else {
+                mostrarErroresServidor(error, {
+                    nombre: 'regNombreError', email: 'regEmailError', password: 'regPasswordError'
+                }, 'regPassword2Error');
+            }
+        } finally {
+            ocupado(boton, false);
+        }
+    }
+
+    async function cerrarSesion() {
+        try {
+            await window.EduTrack.api.post('/api/auth/logout');
+        } catch {
+            /* la sesión local se cierra de todos modos */
+        }
+        limpiarSesionLocal();
+        mostrarVista('landing');
+    }
+
+    function sesionExpirada() {
+        if (!state.usuario) return;
+        limpiarSesionLocal();
+        mostrarVista('login');
+        showToast('Tu sesión expiró. Inicia sesión de nuevo', 'info');
+    }
+
+    async function restaurarSesion() {
+        try {
+            var r = await window.EduTrack.api.get('/api/auth/yo');
+            entrar(r.usuario);
+        } catch {
+            /* sin sesión activa: se queda la página de inicio */
+        }
+    }
+
+    /* ════════════════════════════════════════════
        INIT
     ════════════════════════════════════════════ */
     function init() {
@@ -1142,25 +1369,12 @@
         if (vLanding) vLanding.classList.add('view--active');
 
         var fLogin = document.getElementById('formLogin');
-        if (fLogin) {
-            fLogin.addEventListener('submit', function (e) {
-                e.preventDefault();
-                var nombre = (document.getElementById('loginNombre') || {}).value || '';
-                var pass = (document.getElementById('loginPassword') || {}).value || '';
-                var errN = document.getElementById('loginNombreError');
-                var errP = document.getElementById('loginPasswordError');
-                var ok = true;
-                if (!nombre.trim()) {
-                    if (errN) { errN.textContent = 'Ingresa tu usuario'; errN.classList.add('visible'); }
-                    ok = false;
-                } else { if (errN) { errN.textContent = ''; errN.classList.remove('visible'); } }
-                if (!pass.trim()) {
-                    if (errP) { errP.textContent = 'Ingresa tu contraseña'; errP.classList.add('visible'); }
-                    ok = false;
-                } else { if (errP) { errP.textContent = ''; errP.classList.remove('visible'); } }
-                if (ok) mostrarVista('dashboard', { nombre: nombre });
-            });
-        }
+        if (fLogin) fLogin.addEventListener('submit', iniciarSesion);
+
+        var fRegistro = document.getElementById('formRegistro');
+        if (fRegistro) fRegistro.addEventListener('submit', registrarCuenta);
+
+        document.addEventListener('studentscope:sesion-expirada', sesionExpirada);
 
         var btnNotif = document.getElementById('btnNotificaciones');
         if (btnNotif) {
@@ -1183,9 +1397,7 @@
 
         /* ── FIX: Logout → landing (no login) ── */
         var btnLogout = document.getElementById('btnLogout');
-        if (btnLogout) btnLogout.addEventListener('click', function () {
-            mostrarVista('landing');
-        });
+        if (btnLogout) btnLogout.addEventListener('click', cerrarSesion);
 
         initNavSidebar();
 
@@ -1229,10 +1441,15 @@
             const accion = ACCIONES[elemento.getAttribute('data-action')];
             if (accion) accion(elemento);
         });
+
+        window.EduTrack.cuentas.iniciar();
+        restaurarSesion();
     }
 
     const ACCIONES = {
         'ir-login': function () { mostrarVista('login'); },
+        'ir-registro': function () { mostrarVista('registro'); },
+        'ir-landing': function () { mostrarVista('landing'); },
         'editar': function (el) { abrirModal(num(el.getAttribute('data-id'))); },
         'eliminar': function (el) { eliminarEstudiante(num(el.getAttribute('data-id'))); },
         'pagina': function (el) { cambiarPagina(num(el.getAttribute('data-page'))); },
@@ -1248,12 +1465,6 @@
         'exportar-csv': function () { exportarCSV(); },
         'restablecer-datos': function () { restablecerDatos(); }
     };
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
 
     /* API pública */
     window.EduTrack = window.EduTrack || {};
@@ -1272,5 +1483,17 @@
     window.EduTrack.exportarCSV = exportarCSV;
     window.EduTrack.restablecerDatos = restablecerDatos;
     window.EduTrack.cerrarPanelNotificaciones = cerrarPanelNotificaciones;
+    window.EduTrack.toast = showToast;
+    window.EduTrack.confirmar = abrirConfirm;
+    window.EduTrack.marcarError = setFieldError;
+    window.EduTrack.usuarioActual = function () { return state.usuario; };
+    window.EduTrack.actualizarUsuarioActual = actualizarUsuarioActual;
+    window.EduTrack.registrarAcciones = function (acciones) { Object.assign(ACCIONES, acciones); };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
 
 })();

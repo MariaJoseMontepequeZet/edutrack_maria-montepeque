@@ -4,11 +4,12 @@
   "description": "Panel de gestion educativa StudentScope MJ",
   "private": true,
   "scripts": {
+    "dev": "node scripts/servir.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "format": "prettier --write test eslint.config.mjs vitest.config.mjs",
-    "format:check": "prettier --check test eslint.config.mjs vitest.config.mjs"
+    "format": "prettier --write test scripts eslint.config.mjs vitest.config.mjs",
+    "format:check": "prettier --check test scripts eslint.config.mjs vitest.config.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
